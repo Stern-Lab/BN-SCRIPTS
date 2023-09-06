@@ -6,7 +6,7 @@ import io
 import pandas as pd
 
 
-def read_vcf(path=r"C:\Users\idofa\Google Drive\Programming_Projects\SternLab_workdir\problematic_sites_sarsCov2.vcf"):
+def read_vcf(path=r"./filter_replicate_script/problematic_sites_sarsCov2.vcf"):
     with open(path, 'r') as f:
         lines = [l for l in f if not l.startswith('##')]
     return pd.read_csv(

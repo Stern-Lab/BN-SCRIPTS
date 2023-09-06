@@ -65,7 +65,7 @@ def filter_df(df, freq, coverage, base_count):
                 (df['coverage'] >= coverage) & (df['base_count'] >= base_count)]
     return df[~df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
-def filter(tsv1, tsv2, patient, tp_dir_name, freq, covrage, base_count, protein_dict):
+def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_dict):
     """
     Filters a dataframe of mutations according to the threshold arguments provided and according to
     the list of known problematic position (provided by the PROBLEMATIC assignment at the top).
@@ -81,28 +81,28 @@ def filter(tsv1, tsv2, patient, tp_dir_name, freq, covrage, base_count, protein_
     if not os.path.exists(patient_dir):
         os.makedirs(patient_dir)
     run_dir = f"results_{date_time_str}"
-    res_dir = f"{patient_dir}/{tp_dir_name}/{run_dir}"
+    res_dir = f"{patient_dir}/{timepoint}/{run_dir}"
     os.makedirs(res_dir)
 
     # Read file & add columns & filter mutations to each pair of replica's freqs file
     rep1_df = pd.read_csv(tsv1, sep='\t')
-    rep1_df = filter_df(rep1_df, freq, covrage, base_count)
+    rep1_df = filter_df(rep1_df, freq, coverage, base_count)
     rep1_df = enrich_mutation(rep1_df)
     rep1_df = filter_ref(rep1_df)
-    rep1_df.to_csv(f"{res_dir}/replicate1_{freq}_{covrage}_{base_count}.csv", index=False)
+    rep1_df.to_csv(f"{res_dir}/replicate1_{freq}_{coverage}_{base_count}.csv", index=False)
 
     rep2_df = pd.read_csv(tsv2, sep='\t')
-    rep2_df = filter_df(rep2_df, freq, covrage, base_count)
+    rep2_df = filter_df(rep2_df, freq, coverage, base_count)
     rep2_df = enrich_mutation(rep2_df)
     rep2_df = filter_ref(rep2_df)
-    rep2_df.to_csv(f"{res_dir}/replicate1_{freq}_{covrage}_{base_count}.csv", index=False)
+    rep2_df.to_csv(f"{res_dir}/replicate1_{freq}_{coverage}_{base_count}.csv", index=False)
     
     # Create DF for next phase (BN algorithem)
     filtered_rep1 = rep1_df[["mutation", "frequency"]]
-    filtered_rep1.to_csv(f"{res_dir}/mut_freq_1_{freq}_{covrage}_{base_count}.csv", index=False)
+    filtered_rep1.to_csv(f"{res_dir}/mut_freq_1_{freq}_{coverage}_{base_count}.csv", index=False)
     
     filtered_rep2 = rep2_df[["mutation", "frequency"]]
-    filtered_rep2.to_csv(f"{res_dir}/mut_freq_2_{freq}_{covrage}_{base_count}.csv", index=False)
+    filtered_rep2.to_csv(f"{res_dir}/mut_freq_2_{freq}_{coverage}_{base_count}.csv", index=False)
     
 
     # Merge data framse based on common mutation after filtering
@@ -132,7 +132,7 @@ def filter(tsv1, tsv2, patient, tp_dir_name, freq, covrage, base_count, protein_
         
         # Usecase 2
         elif (0.8 <= big_freq) and (small_freq < 0.5):
-            merged_df.loc[ind, 'CriticalDelta'] = "yes"  # CriticalDelta yes
+            merged_df.loc[ind, 'CriticalDelta'] = "Yes"  # CriticalDelta yes
             merged_df.loc[ind, 'UseCaseGroup'] = 2
         
         # Usecase 3
@@ -154,14 +154,15 @@ def filter(tsv1, tsv2, patient, tp_dir_name, freq, covrage, base_count, protein_
             else:
                 merged_df.loc[ind, 'UseCaseGroup'] = 6
                 continue
+        
         # No appropriate usecase
         else:
             continue
     
-    merged_df.to_csv(f"{res_dir}/merged_{freq}_{covrage}_{base_count}.csv", index=False)
+    merged_df.to_csv(f"{res_dir}/merged_{freq}_{coverage}_{base_count}.csv", index=False)
     usecase_df = merged_df[["ref_pos_x", "mutation", "mutation_type", "base_count_x", "coverage_x", "base_count_y", "coverage_y", "frequency_x", "frequency_y", "CriticalDelta", "UseCaseGroup"]]
-    usecase_df.to_csv(f"{res_dir}/usecase_{freq}_{covrage}_{base_count}.csv", index=False)
+    usecase_df.to_csv(f"{res_dir}/usecase_{freq}_{coverage}_{base_count}.csv", index=False)
     output_df = merged_df[["mutation", "frequency_x", "frequency_y", "CriticalDelta"]]
-    output_df.to_csv(f"{res_dir}/output3_{freq}_{covrage}_{base_count}.csv", index=False)
+    output_df.to_csv(f"{res_dir}/output3_{freq}_{coverage}_{base_count}.csv", index=False)
     
-    return
+    return usecase_df

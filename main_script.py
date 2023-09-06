@@ -9,6 +9,23 @@ PATH_V3 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_
 PATH_V4 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V4"
 PATIENTS = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/all_patients_global_content_initials.csv"
 
+def get_freq_file(sample_id, v3_dirs, v4_dirs):
+            
+            if sample_id in v3_dirs:
+                freq_file = PATH_V3 + "/" + sample_id + "/freqs.tsv"
+                return freq_file, True
+
+            elif sample_id in v4_dirs:
+                freq_file = PATH_V4 + "/" + sample_id + "/freqs.tsv"
+                return freq_file, True
+            
+            else:
+                print(f"Directory {sample_id} wasn't found in V3 or V4. Skipping...")
+                return "", False
+            
+            
+
+
 if __name__ == "__main__":
     print("Main script is starting...")
     start = time.time()
@@ -26,7 +43,7 @@ if __name__ == "__main__":
 
         # Update results data frame with all inforamtion needed
         for ind, curr_row in all_patients_df.iterrows():
-            if (ind == sample_size):
+            if (ind == sample_size-1):
                 continue
 
             next_row = all_patients_df.loc[ind+1]
@@ -34,7 +51,7 @@ if __name__ == "__main__":
 
             # Check if two samples are related to same patient
             if (np.isnan(curr_row["sample"]) or np.isnan(next_row["sample"])):
-                print("Sample id is nan. Skipping...")
+                print("Sample id is nan. Skipping iteration...")
                 continue
 
             # Get patient info
@@ -61,23 +78,24 @@ if __name__ == "__main__":
             results_df.loc[ind, "Date_2"] = next_row["sampling date"]
 
             # Find sample1/replicate1 file
-            if curr_sample_id in v3_dirs:
-                tsv1 = PATH_V3 + "/" + curr_sample_id + "/freqs.tsv"
-            elif curr_sample_id in v4_dirs:
-                tsv1 = PATH_V4 + "/" + curr_sample_id + "/freqs.tsv"
-            else:
-                print(f"Directory {curr_sample_id} wasn't found in V3 or V4. Skipping...")
-                continue
+            s1_rep1, found = get_freq_file(curr_sample_id, v3_dirs, v4_dirs)
+            if not(found):
+                 continue
+            # Find sample1/replicate2 file
+            s1_rep2, found = get_freq_file(curr_sample_id + "_L001", v3_dirs, v4_dirs)
+            if not (found):
+                 continue
             
-            # Find sample1/replicate1 file
-            if curr_sample_id in v3_dirs:
-                tsv2 = PATH_V3 + "/" + curr_sample_id + "_L001" + "/freqs.tsv"
-            elif curr_sample_id in v4_dirs:
-                tsv2 = PATH_V4 + "/" + curr_sample_id + "_L001" + "/freqs.tsv"
-            else:
-                print(f"Directory {curr_sample_id} wasn't found in V3 or V4. Skipping...")
-                continue
+            # filter time point 1
 
+            # Find sample2/replicate1 file
+            s2_rep1 = get_freq_file(next_sample_id, v3_dirs, v4_dirs)
+            if not (found):
+                 continue
+            # Find sample2/replicate2 file
+            s2_rep2 = get_freq_file(next_sample_id + "_L001", v3_dirs, v4_dirs)
+            if not (found):
+                 continue
         
         results_df.to_csv("./Results.csv", index=False)
     

@@ -1,19 +1,12 @@
-# filter.py python script filters 2 replicates indepandently by user parameters of minimum frequency, minimum Base Count and minimum Coverged value
-# Input for script
-- Folder name containing 2 .tsv files named replicate1 and replicate 2
-# Output: Results directory containing:
--replicate1/2.csv - containing all data per replicate after filtering minimum frequency, minimum Base Count and minimum Coverged value
--merged.csv - containing all data for join replicates (only common mutations) after filtering minimum frequency, minimum Base Count and minimum Coverged value
--Output1 - containing mutation name and frequency for replicate1
--Output2 - containing mutation name and frequency for replicate2
--Output3 - containing mutation name and frequency for merged replicates after more filtering on both replicates. Also contains if there is a critical delta between 2 replicates
+# Information
+- main_script.py python script filters 2 replicates indepandently by hardcoded changeable parameters (FREQ, BASECOUNT, COVERAGE)
 
-# filtered_2_BN_input.py python script recives 2 filtered samples of two time points and create exact and approx format input files for Bottle Neck algorithem
 # Input for script
-- Folder name containing 2 .tsv files named replicate1 and replicate2
-# Output: Results directory containing:
--replicate1/2.csv - containing all data per replicate after filtering minimum frequency, minimum Base Count and minimum Coverged value
--merged.csv - containing all data for join replicates (only common mutations) after filtering minimum frequency, minimum Base Count and minimum Coverged value
--Output1 - containing mutation name and frequency for replicate1
--Output2 - containing mutation name and frequency for replicate2
--Output3 - containing mutation name and frequency for merged replicates after more filtering on both replicates. Also contains if there is a critical delta between 2 replicates
+- Script will ask where are you running the script for path variables
+
+# Output: Results directory organized by Patient name and time point named after script running date and hour:
+- replicate_1/2_freq_base_count_coverage.csv - containing all data per replicate after filtering minimum frequency, minimum Base Count and minimum Coverged value
+- merged_freq_base_count_coverage.csv - containing all data for join replicates (only common mutations) after filtering minimum frequency, minimum Base Count and minimum Coverged value
+- mut_freq_1/2_freq_base_count_coverage - containing mutation name and frequency for replicate1/2
+- usecase_freq_base_count_coverage - containing mutation name and inforamtion about use case and CriticalDelta
+- Output3 - containing mutation name and frequency for merged replicates after more filtering on both replicates

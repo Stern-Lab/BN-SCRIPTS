@@ -1,1 +1,2 @@
-./results/*
+# ignore results folder
+results/

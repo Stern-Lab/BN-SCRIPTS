@@ -48,7 +48,7 @@ if __name__ == "__main__":
         protein_dict = prot.create_protein_dict() # Protein dictionary
         all_patients_df = pd.read_csv(PATIENTS) # Load patients data
         sample_size = all_patients_df.shape[0]
-        res_cols = ["Patient", "Timepoints", "sample_ID", "Date", "merged_total_mutations", "criticalDelta_cnt",
+        res_cols = ["Patient", "Timepoints", "sample_ID", "Date","Ct", "merged_total_mutations", "criticalDelta_cnt",
                     "UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq"]
         results_df = pd.DataFrame(columns=res_cols) # Create results data frame
         
@@ -89,6 +89,7 @@ if __name__ == "__main__":
             results_df.loc[ind, "Patient"] = curr_patient_id
             results_df.loc[ind, "sample_ID"] = curr_sample_id
             results_df.loc[ind, "Date"] = curr_row["sampling date"]
+            results_df.loc[ind, "Ct"] = curr_row["mean ct"]
             
             # filter timepoint and update data to results
             usecase_df = ff.filter(s1_rep1, s1_rep2, curr_patient_id, curr_timepoint, FREQ, COVERAGE, BASECOUNT, protein_dict)

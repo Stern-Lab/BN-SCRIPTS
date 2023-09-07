@@ -95,7 +95,7 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
     rep2_df = filter_df(rep2_df, freq, coverage, base_count)
     rep2_df = enrich_mutation(rep2_df)
     rep2_df = filter_ref(rep2_df)
-    rep2_df.to_csv(f"{res_dir}/replicate1_{freq}_{coverage}_{base_count}.csv", index=False)
+    rep2_df.to_csv(f"{res_dir}/replicate2_{freq}_{coverage}_{base_count}.csv", index=False)
     
     # Create DF for next phase (BN algorithem)
     filtered_rep1 = rep1_df[["mutation", "frequency"]]

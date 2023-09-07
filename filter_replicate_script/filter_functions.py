@@ -162,7 +162,7 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
     merged_df.to_csv(f"{res_dir}/merged_{freq}_{coverage}_{base_count}.csv", index=False)
     usecase_df = merged_df[["ref_pos_x", "mutation", "mutation_type", "base_count_x", "coverage_x", "base_count_y", "coverage_y", "frequency_x", "frequency_y", "CriticalDelta", "UseCaseGroup"]]
     usecase_df.to_csv(f"{res_dir}/usecase_{freq}_{coverage}_{base_count}.csv", index=False)
-    output_df = merged_df[["mutation", "frequency_x", "frequency_y", "CriticalDelta"]]
+    output_df = merged_df[["mutation", "frequency_x", "frequency_y"]]
     output_df.to_csv(f"{res_dir}/output3_{freq}_{coverage}_{base_count}.csv", index=False)
     
     return usecase_df

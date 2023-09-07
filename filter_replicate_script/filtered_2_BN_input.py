@@ -1,6 +1,5 @@
 from datetime import datetime
 import pandas as pd
-import list_PROBLEMATIC_positions
 import os
 
 def join_time_samples(f_name1, f_name2):

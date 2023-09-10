@@ -54,16 +54,15 @@ if __name__ == "__main__":
             if (user_input == "1"):
                 PATH_V3 = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3"
                 PATH_V4 = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V4"
-                PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/all_patients_global_content_initials.csv"
+                PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V2.csv"
                 break
             elif (user_input == "2"):
                 PATH_V3 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3"
                 PATH_V4 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V4"
-                PATIENTS = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/all_patients_global_content_initials.csv"
+                PATIENTS = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V2.csv"
                 break
             else:
-                user_input = input(
-                    "Wrong input please try again\nEnter 1 for cluster and 2 for local run: ")
+                user_input = input("Wrong input please try again\nEnter 1 for cluster and 2 for local run: ")
         
         protein_dict = prot.create_protein_dict() # Protein dictionary
         all_patients_df = pd.read_csv(PATIENTS) # Load patients data
@@ -84,12 +83,19 @@ if __name__ == "__main__":
 
             # Check if sample is not nan
             if (np.isnan(curr_row["sample"])):
-                print("Sample id is nan. Skipping iteration...")
+                print("Sample id is empty. Skipping iteration...")
                 continue
 
             # Get patient info
             curr_sample_id = str(int(curr_row["sample"]))
+            if (pd.isna(curr_row["patient_ID"])):
+                print("Patient id is empty. Skipping iteration...")
+                continue
             curr_patient_id = curr_row["patient_ID"][:2]
+
+            if (np.isnan(curr_row["time_since_first_sampling"])):
+                print("Sample time is empty. Skipping iteration...")
+                continue
             curr_timepoint = int(curr_row["time_since_first_sampling"])
 
             print(f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.")

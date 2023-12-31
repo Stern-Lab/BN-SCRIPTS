@@ -1,12 +1,6 @@
 library(tidyverse)
 library(argparse)
 library(rmutil)
-library(conflicted)
-# Set the preference for filter() to use dplyr
-conflict_prefer("filter", "dplyr")
-# Set the preference for lag() to use dplyr
-conflict_prefer("lag", "dplyr")
-
 # Handle command line arguments first
 
 parser <- ArgumentParser()
@@ -149,7 +143,7 @@ if(plot_bool == TRUE){
     geom_vline(xintercept= lower_CI_bottleneck, color = "green" ) +
     geom_vline(xintercept= upper_CI_bottleneck, color = "green" ) + 
     labs(x= "Bottleneck Size", y = "Log Likelihood" )
-  ggsave(filename= paste(args$file, "_exact.jpg"))
+  ggsave("exact_plot.jpg")
 }
 print("Bottleneck size")
 if(length(Max_LL_bottleneck) > 1){print("MLE is degenerate.  The best bottleneck values are")}

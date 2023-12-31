@@ -1,2 +1,4 @@
 # ignore all results folder
-/results
+/BN_Create_input/results
+/Filter_Usecase/results
+

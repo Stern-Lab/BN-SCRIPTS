@@ -104,6 +104,4 @@ def main():
     print("***BN estimation Script finished!***")
     print(f"BN estimation Script elapsed time: {(time.time() - start)} sec")
 
-    
-
     return

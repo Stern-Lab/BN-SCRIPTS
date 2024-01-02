@@ -128,9 +128,13 @@ ggplot(data = LL_tibble) + geom_point(aes(x = bottleneck_size, y= Log_Likelihood
   geom_vline(xintercept= Max_LL_bottleneck )  + 
   geom_vline(xintercept= lower_CI_bottleneck, color = "green" ) +
   geom_vline(xintercept= upper_CI_bottleneck, color = "green"  ) + 
-  labs(x= "Bottleneck Size", y = "Log Likelihood" )
-ggsave(filename= paste(args$file, "_approx.jpg"))
+  labs(x= "Bottleneck Size", y = "Log Likelihood")
+f_name <- args$file
+base_name <- sub("\\.[^.]*$", "", f_name)  # Remove extension
+ggsave(filename= paste0(base_name, "_approx.jpg"))
 }
+
+print(f_name)
 print("Bottleneck size")
 if(length(Max_LL_bottleneck) > 1){print("MLE is degenerate.  The best bottleneck values are")}
 print(Max_LL_bottleneck)

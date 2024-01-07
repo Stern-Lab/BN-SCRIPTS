@@ -1,13 +1,6 @@
 library(tidyverse)
 library(argparse)
 library(rmutil)
-library(conflicted)
-# Set the preference for filter() to use dplyr
-conflicts_prefer(dplyr::filter())
-# Set the preference for lag() to use dplyr
-conflicts_prefer(dplyr::lag())
-# Set the preference for as.data.frame() to use rmutil
-conflicts_prefer(rmutil::as.data.frame)`
 
 
 # Handle command line arguments first

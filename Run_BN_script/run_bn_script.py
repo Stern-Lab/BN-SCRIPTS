@@ -90,9 +90,9 @@ def main():
 
                 # Check for errors
                 if error:
-                    print(f"Error occurred: {error.decode('utf-8')}")
+                    print(f"Error occurred:\n {error.decode('utf-8')}")
                 else:
-                    print(f"R script executed successfully: {output.decode('utf-8')}")
+                    print(f"R script executed successfully:\n {output.decode('utf-8')}")
     
     except Exception as e:
         print("An error has occured!\nTerminating script...")

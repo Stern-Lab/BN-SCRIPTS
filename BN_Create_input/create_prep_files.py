@@ -48,7 +48,6 @@ def get_bn_prep_files(directory, patient_id, timepoint):
 def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
     return (bs1 + bs2) / (cvg1 + cvg2)
 
-# if __name__ == "__main__":
 def main():
     print("BN prepartion files script is starting...")
     run_start = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
@@ -131,14 +130,13 @@ def main():
             # Calculate frequencies by Usecase
             for i, row in res_df.iterrows():
                 # Previous time point
-                
                 # Take weighted average for all usecases
                 final_freq1 = calc_weighted_avg(row[f'base_count_{prev_timepoint}_1'], row[f'base_count_{prev_timepoint}_2'], row[f'coverage_{prev_timepoint}_1'], row[f'coverage_{prev_timepoint}_2'])
                 
                 # Current time point
-                
                 # Take weighted average for all usecases
                 final_freq2 = calc_weighted_avg(row[f'base_count_{curr_timepoint}_1'], row[f'base_count_{curr_timepoint}_2'], row[f'coverage_{curr_timepoint}_1'], row[f'coverage_{curr_timepoint}_2'])
+
                 coverage_sum2 = (row[f'coverage_{curr_timepoint}_1'] + row[f'coverage_{curr_timepoint}_2'])
                 base_count_sum2 = (row[f'base_count_{curr_timepoint}_1'] + row[f'base_count_{curr_timepoint}_2'])
             

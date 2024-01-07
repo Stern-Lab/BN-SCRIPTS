@@ -142,20 +142,24 @@ if(min(Max_LL_bottleneck) == min(bottleneck_values_vector))
 if(min(bottleneck_values_vector) > 1){print("Peak bottleneck value for MLE is at Nb_min (or smallest possible value given Nb_increment)!  Try lowering Nb_min for better bottleneck estimate")}
 }
 
+f_name <- args$file
+base_name <- sub("\\.[^.]*$", "", f_name)  # Remove extension
+
 # now we plot our results
 if(plot_bool == TRUE){
-  ggplot(data = LL_tibble) + geom_point(aes(x = bottleneck_size, y= Log_Likelihood )) + 
-    geom_vline(xintercept= Max_LL_bottleneck )  + 
-    geom_vline(xintercept= lower_CI_bottleneck, color = "green" ) +
-    geom_vline(xintercept= upper_CI_bottleneck, color = "green" ) + 
-    labs(x= "Bottleneck Size", y = "Log Likelihood" )
-  ggsave(filename= paste(args$file[:-3], "_exact.jpg"))
+LL_tibble <- filter(LL_tibble, Log_Likelihood != -Inf)
+ggplot(data = LL_tibble) + geom_point(aes(x = bottleneck_size, y= Log_Likelihood )) + 
+  geom_vline(xintercept= Max_LL_bottleneck )  + 
+  geom_vline(xintercept= lower_CI_bottleneck, color = "green" ) +
+  geom_vline(xintercept= upper_CI_bottleneck, color = "green"  ) + 
+  labs(x= "Bottleneck Size", y = "Log Likelihood")
+ggsave(filename= paste0(base_name, "_exact.jpg"))
 }
-print("Bottleneck size")
-if(length(Max_LL_bottleneck) > 1){print("MLE is degenerate.  The best bottleneck values are")}
-print(Max_LL_bottleneck)
-print("confidence interval left bound")
-print(lower_CI_bottleneck)
-print("confidence interval right bound")
-print(upper_CI_bottleneck)
+
+results_file <- paste0(base_name, "_exact_results.txt")
+text <- paste("Bottleneck size\n", Max_LL_bottleneck,
+              "Confidence interval left bound\n", lower_CI_bottleneck,
+              "Confidence interval right bound\n", upper_CI_bottleneck)
+writeLines(text, results_file)
+
 

@@ -2,9 +2,11 @@ library(tidyverse)
 library(argparse)
 library(conflicted)
 # Set the preference for filter() to use dplyr
-conflict_prefer("filter", "dplyr")
+conflicts_prefer(dplyr::filter())
 # Set the preference for lag() to use dplyr
-conflict_prefer("lag", "dplyr")
+conflicts_prefer(dplyr::lag())
+# Set the preference for as.data.frame() to use rmutil
+conflicts_prefer(rmutil::as.data.frame)`
 
 # Handle command line arguments first
 parser <- ArgumentParser()
@@ -137,8 +139,8 @@ ggsave(filename= paste0(base_name, "_approx.jpg"))
 
 results_file <- paste0(base_name, "_approx_results.txt")
 text <- paste("Bottleneck size\n", Max_LL_bottleneck,
-              "confidence interval left bound\n", lower_CI_bottleneck,
-              "confidence interval right bound\n", upper_CI_bottleneck)
+              "\nconfidence interval left bound\n", lower_CI_bottleneck,
+              "\nconfidence interval right bound\n", upper_CI_bottleneck)
 writeLines(text, results_file)
 
 

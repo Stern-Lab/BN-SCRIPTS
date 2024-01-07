@@ -19,17 +19,17 @@ def get_res_dir():
 def get_user_usecase():
     uc_list = []
     while True:
-        num = input("Enter D for default (1,2,3,4,6) or usecase (1 to 6) that will be considered in calculation and 0 when finished: ")
+        num = input("Enter D for default (1,3,4,6) or usecase (1 to 7) that will be considered in calculation and 0 when finished: ")
         
         if num == "0":
             print(f"Usecases that will be used are {uc_list}")
             break
         elif num == "D":
-            uc_list = [1,2,3,4,6]
+            uc_list = [1,3,4,6]
             print(f"Usecases that will be used are {uc_list}")
             break
         else:
-            if (num in ["1", "2", "3", "4", "5", "6"] and int(num) not in uc_list):
+            if (num in ["1", "2", "3", "4", "5", "6", "7"] and int(num) not in uc_list):
                 uc_list.append(int(num))
             else:
                 print("Wrong input! Enter again...")

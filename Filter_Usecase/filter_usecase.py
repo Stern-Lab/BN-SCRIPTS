@@ -56,7 +56,7 @@ def main():
         sample_size = all_patients_df.shape[0]
         res_cols = ["Patient", "Timepoint", "sample_ID", "Date","Ct", "total_mutations_Before_Filtering_rep1", "total_mutations_Before_Filtering_rep2",
                     "total_mutations_Before_Filtering_merged", "total_mutations_After_Filtering_merged","criticalDelta_cnt", "UC1_freq", "UC2_freq",
-                    "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq"]
+                    "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
         results_df = pd.DataFrame(columns=res_cols) # Create results data frame
         
         # Get list of all directories
@@ -64,7 +64,7 @@ def main():
         v4_dirs = os.listdir(PATH_V4)
 
         # Update results data frame with all inforamtion needed
-        change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to enter filtering parameters (y/n)? ")
+        change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to change filtering parameters (y/n)? ")
         while True:
             if (change_filter == "n"):
                 FREQ = 0.01
@@ -131,7 +131,7 @@ def main():
             results_df.loc[ind, "total_mutations_After_Filtering_merged"] = num_of_mut_merged
             
             # Update usecases statistics
-            us_col_list = ["UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq"]
+            us_col_list = ["UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
             results_df = usecase_calc(usecase_df, results_df, us_col_list, ind, num_of_mut_merged)
         
         # Save data frame as a file

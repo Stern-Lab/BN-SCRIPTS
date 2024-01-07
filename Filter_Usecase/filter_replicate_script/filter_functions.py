@@ -145,22 +145,26 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
         # Usecase 1
         if (0.8 <= big_freq) and (0.5 <= small_freq):
             merged_df.loc[ind, 'UseCaseGroup'] = 1
-            continue # keep
+            continue
         
         # Usecase 2
         elif (0.8 <= big_freq) and (small_freq < 0.5):
-            merged_df.loc[ind, 'CriticalDelta'] = "Yes"  # CriticalDelta yes
+            merged_df.loc[ind, 'CriticalDelta'] = "Yes"
             merged_df.loc[ind, 'UseCaseGroup'] = 2
         
         # Usecase 3
         elif (0.5 <= big_freq < 0.8) and (0.5 <= small_freq < 0.8):
             merged_df.loc[ind, 'UseCaseGroup'] = 3
-            continue  # keep
+            continue
         
-        # Usecase 4
         elif (0.5 <= big_freq < 0.8) and (small_freq < 0.5):
-            merged_df.loc[ind, 'UseCaseGroup'] = 4
-            continue  # keep
+            # Usecase 4
+            if abs(big_freq - small_freq) < 0.3:
+                merged_df.loc[ind, 'UseCaseGroup'] = 4
+            # Usecase 7
+            else:
+                merged_df.loc[ind, 'UseCaseGroup'] = 7
+            continue
 
         elif (big_freq < 0.5) and (small_freq < 0.5):
             # Usecase 5
@@ -169,7 +173,7 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
             # Usecase 6
             else:
                 merged_df.loc[ind, 'UseCaseGroup'] = 6
-                continue
+            continue
         
         # No appropriate usecase
         else:

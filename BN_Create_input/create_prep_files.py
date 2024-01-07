@@ -132,35 +132,15 @@ def main():
             for i, row in res_df.iterrows():
                 # Previous time point
                 
-                # Take replicate with minimum frequency for usecase 1,3,6
-                if (row['UseCaseGroup_x'] in [1,3,6]):
-                    final_freq1 = min(row[f'frequency_{prev_timepoint}_1'], row[f'frequency_{prev_timepoint}_2'])
-                # Take weighted average for usecases 2,4
-                elif (row['UseCaseGroup_x'] in [2,4]):
-                    final_freq1 = calc_weighted_avg(row[f'base_count_{prev_timepoint}_1'], row[f'base_count_{prev_timepoint}_2'], row[f'coverage_{prev_timepoint}_1'], row[f'coverage_{prev_timepoint}_2'])
+                # Take weighted average for all usecases
+                final_freq1 = calc_weighted_avg(row[f'base_count_{prev_timepoint}_1'], row[f'base_count_{prev_timepoint}_2'], row[f'coverage_{prev_timepoint}_1'], row[f'coverage_{prev_timepoint}_2'])
                 
                 # Current time point
-
-                # Take replicate with minimum frequency for usecase 1,3,6
-                if (row['UseCaseGroup_y'] in [1,3,6]):
-                    # If both replicates frequnceies are equal
-                    equal = True if (row[f'frequency_{curr_timepoint}_1'] == row[f'frequency_{curr_timepoint}_2']) else False
-                    if equal:
-                        base_count_sum2 = (row[f'base_count_{curr_timepoint}_1'] + row[f'base_count_{curr_timepoint}_2'])
-                        coverage_sum2 = (row[f'coverage_{curr_timepoint}_1'] + row[f'coverage_{curr_timepoint}_2'])
-                    # If not equal take the minimum's replicate coverage and basecount
-                    else:
-                        min_replicate = 1 if (row[f'frequency_{curr_timepoint}_1'] < row[f'frequency_{curr_timepoint}_2']) else 2
-                        base_count_sum2 = row[f'base_count_{curr_timepoint}_{min_replicate}']
-                        coverage_sum2 = row[f'coverage_{curr_timepoint}_{min_replicate}']
-                    
-                    final_freq2 = min(row[f'frequency_{curr_timepoint}_1'], row[f'frequency_{curr_timepoint}_2'])
                 
-                # Take weighted average for usecases 2,4
-                elif (row['UseCaseGroup_y'] in [2,4]):
-                    final_freq2 = calc_weighted_avg(row[f'base_count_{curr_timepoint}_1'], row[f'base_count_{curr_timepoint}_2'], row[f'coverage_{curr_timepoint}_1'], row[f'coverage_{curr_timepoint}_2'])
-                    coverage_sum2 = (row[f'coverage_{curr_timepoint}_1'] + row[f'coverage_{curr_timepoint}_2'])
-                    base_count_sum2 = (row[f'base_count_{curr_timepoint}_1'] + row[f'base_count_{curr_timepoint}_2'])
+                # Take weighted average for all usecases
+                final_freq2 = calc_weighted_avg(row[f'base_count_{curr_timepoint}_1'], row[f'base_count_{curr_timepoint}_2'], row[f'coverage_{curr_timepoint}_1'], row[f'coverage_{curr_timepoint}_2'])
+                coverage_sum2 = (row[f'coverage_{curr_timepoint}_1'] + row[f'coverage_{curr_timepoint}_2'])
+                base_count_sum2 = (row[f'base_count_{curr_timepoint}_1'] + row[f'base_count_{curr_timepoint}_2'])
             
                 res_df.loc[i, new_col1] = round(final_freq1, 6)
                 res_df.loc[i, new_col2] = round(final_freq2, 6)

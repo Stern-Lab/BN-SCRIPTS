@@ -43,7 +43,7 @@ def choose_method(path):
         else:
             continue
 
-def main():
+def user_main():
     print("\nRunning R Bottleneck estimation script on preparation files for latest results directory in ./BN_Create_input/results")
     run_start = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     print(run_start)
@@ -105,3 +105,109 @@ def main():
     print(f"BN estimation Script elapsed time: {(time.time() - start)} sec")
 
     return
+
+def automatic_exact():
+    print("\nRunning R Bottleneck estimation script on preparation files for latest results directory in ./BN_Create_input/results")
+    run_start = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    print(run_start)
+    start = time.time()
+
+    try:
+        # Get latest results directory
+        RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/BN_Create_input/results"
+        results_dir = get_latest_res_dir(RESULTS)
+        path = RESULTS[:-35]
+        
+        # Choose script method excat
+        method = f"Rscript {path}/BN-SCRIPTS/Run_BN_script/BB_bottleneck-master/Bottleneck_size_estimation_exact.r --file"
+        
+        # Parameters
+        params = "--plot_bool TRUE --var_calling_threshold 0.03 --Nb_min 1 --Nb_max 200 --Nb_increment 1 --confidence_level .95"
+        print(f"\nDefault command parameters:")
+        print(params)       
+        print(f"\nRESULTS DIR: {results_dir}")
+                
+        # Loop through patients
+        for patient in os.listdir(results_dir):
+            print(f"-----------PATIENT {patient[-2:]}-----------")
+            txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
+            
+            # Run R for file per patient
+            for file in txt_files:
+                command_line = f'{method} "{file}" {params}'
+                process = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # Get the output and errors if any
+                output, error = process.communicate()
+
+                # Check for errors
+                if error:
+                    print(f"Error occurred:\n {error.decode('utf-8')}")
+                else:
+                    print(f"R script executed successfully:\n {output.decode('utf-8')}")
+    
+    except Exception as e:
+        print("An error has occured!\nTerminating script...")
+        print(f"Main script elapsed time: {(time.time() - start)} sec")
+        print("Log:")
+        print(e)
+        exit(1)
+
+    print("***BN estimation Script finished!***")
+    print(f"BN estimation Script elapsed time: {(time.time() - start)} sec")
+
+    return
+
+def automatic_approx():
+    print("\nRunning R Bottleneck estimation script on preparation files for latest results directory in ./BN_Create_input/results")
+    run_start = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    print(run_start)
+    start = time.time()
+
+    try:
+        # Get latest results directory
+        RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/BN_Create_input/results"
+        results_dir = get_latest_res_dir(RESULTS)
+        path = RESULTS[:-35]
+        
+        # Choose script method excat
+        method = f"Rscript {path}/BN-SCRIPTS/Run_BN_script/BB_bottleneck-master/Bottleneck_size_estimation_approx.r --file"
+        
+        # Parameters
+        params = "--plot_bool TRUE --var_calling_threshold 0.03 --Nb_min 1 --Nb_max 200 --Nb_increment 1 --confidence_level .95"
+        print(f"\nDefault command parameters:")
+        print(params)       
+        print(f"\nRESULTS DIR: {results_dir}")
+                
+        # Loop through patients
+        for patient in os.listdir(results_dir):
+            print(f"-----------PATIENT {patient[-2:]}-----------")
+            txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
+            
+            # Run R for file per patient
+            for file in txt_files:
+                command_line = f'{method} "{file}" {params}'
+                process = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                # Get the output and errors if any
+                output, error = process.communicate()
+
+                # Check for errors
+                if error:
+                    print(f"Error occurred:\n {error.decode('utf-8')}")
+                else:
+                    print(f"R script executed successfully:\n {output.decode('utf-8')}")
+    
+    except Exception as e:
+        print("An error has occured!\nTerminating script...")
+        print(f"Main script elapsed time: {(time.time() - start)} sec")
+        print("Log:")
+        print(e)
+        exit(1)
+
+    print("***BN estimation Script finished!***")
+    print(f"BN estimation Script elapsed time: {(time.time() - start)} sec")
+
+    return
+
+if __name__ == "__main__":
+    # automatic_approx()
+    automatic_exact()

@@ -27,7 +27,7 @@ if __name__ == "__main__":
                 createprepfile.main()
                 break
             elif user_input == "4":
-                bn.main()
+                bn.user_main()
                 break
             else:
                 print("Wrong input. Please enter 1, 2, 3 or 4!")

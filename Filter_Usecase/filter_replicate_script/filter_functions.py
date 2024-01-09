@@ -65,7 +65,7 @@ def filter_df(df, freq, coverage, base_count):
                 (df['coverage'] >= coverage) & (df['base_count'] >= base_count)]
     return ret_df[~ret_df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
-def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_dict):
+def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     """
     Filters a dataframe of mutations according to the threshold arguments provided and according to
     the list of known problematic position (provided by the PROBLEMATIC assignment at the top).
@@ -75,14 +75,6 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
     :param base_count: A base_count threshold according to which the received dataframe is to be filtered.
     :return: A new Dataframe identical to the received one, filtered according to the received value thresholds.
     """
-    # Creates results directory
-    date_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    patient_dir = r"./Filter_Usecase/results/" + patient
-    if not os.path.exists(patient_dir):
-        os.makedirs(patient_dir)
-    run_dir = f"results_({freq}_{coverage}_{base_count})_{date_time_str}"
-    res_dir = f"{patient_dir}/{timepoint}/{run_dir}"
-    os.makedirs(res_dir)
 
     # Read file & add columns & filter mutations to each pair of replica's freqs file
     
@@ -105,19 +97,19 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
     rep1_df = filter_df(rep1_df_all, freq, coverage, base_count)
     rep1_df = enrich_mutation(rep1_df)
     rep1_df = filter_ref(rep1_df)
-    rep1_df.to_csv(f"{res_dir}/replicate1.csv", index=False)
+    rep1_df.to_csv(f"{result_dir}/replicate1.csv", index=False)
 
     rep2_df = filter_df(rep2_df_all, freq, coverage, base_count)
     rep2_df = enrich_mutation(rep2_df)
     rep2_df = filter_ref(rep2_df)
-    rep2_df.to_csv(f"{res_dir}/replicate2.csv", index=False)
+    rep2_df.to_csv(f"{result_dir}/replicate2.csv", index=False)
     
     # Create DF for next phase (BN algorithem)
     filtered_rep1 = rep1_df[["mutation", "frequency"]]
-    filtered_rep1.to_csv(f"{res_dir}/mut_freq_1.csv", index=False)
+    filtered_rep1.to_csv(f"{result_dir}/mut_freq_1.csv", index=False)
     
     filtered_rep2 = rep2_df[["mutation", "frequency"]]
-    filtered_rep2.to_csv(f"{res_dir}/mut_freq_2.csv", index=False)
+    filtered_rep2.to_csv(f"{result_dir}/mut_freq_2.csv", index=False)
 
     # Merge data framse based on common mutation after filtering
     merged_df = pd.merge(rep1_df, rep2_df, how="inner", on="mutation")
@@ -177,12 +169,13 @@ def filter(tsv1, tsv2, patient, timepoint, freq, coverage, base_count, protein_d
         
         # No appropriate usecase
         else:
+            merged_df.loc[ind, 'UseCaseGroup'] = 0
             continue
     
-    merged_df.to_csv(f"{res_dir}/merged.csv", index=False)
+    merged_df.to_csv(f"{result_dir}/merged.csv", index=False)
     usecase_df = merged_df[["ref_pos_x", "mutation", "mutation_type", "base_count_x", "base_count_y", "coverage_x", "coverage_y", "frequency_x", "frequency_y", "CriticalDelta", "UseCaseGroup"]]
-    usecase_df.to_csv(f"{res_dir}/usecase.csv", index=False)
+    usecase_df.to_csv(f"{result_dir}/usecase.csv", index=False)
     output_df = merged_df[["mutation", "frequency_x", "frequency_y"]]
-    output_df.to_csv(f"{res_dir}/output3.csv", index=False)
+    output_df.to_csv(f"{result_dir}/output3.csv", index=False)
     
     return usecase_df, num_of_mut_rep1, num_of_mut_rep2, num_of_mut_merged, num_of_mut_merged_all

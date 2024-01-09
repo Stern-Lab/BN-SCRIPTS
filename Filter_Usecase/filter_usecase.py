@@ -19,19 +19,22 @@ def get_freq_file(sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4):
         print(f"Directory {sample_id} wasn't found in V3 or V4. Skipping...")
         return "", False
 
-def usecase_calc(uc_df, res_df, cols_list, ind, mut_cnt):
+def usecase_calc(uc_df, res_df, ind, mut_cnt):
+    cols_list = uc_df["UseCaseGroup"].value_counts().index.tolist()
     for col in cols_list:
-        res_df.loc[ind, col] = 0
+        res_df.loc[ind, f"UC{col}_freq"] = 0
 
-    for key in uc_df["UseCaseGroup"].value_counts().index.tolist():
-        res_df.loc[ind, cols_list[key-1]] = (uc_df["UseCaseGroup"].value_counts()[key])/mut_cnt
+    for col in cols_list:
+        res_df.loc[ind, f"UC{col}_freq"] = (uc_df["UseCaseGroup"].value_counts()[col])/mut_cnt
 
     res_df.loc[ind, "criticalDelta_cnt"] = len(uc_df[uc_df["CriticalDelta"] != "No"])
     return res_df
 
 def main():
     print("Data filtering and Usecase table creation script is starting...")
-    print(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    date_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    print(date_time_str)
+
     start = time.time()
     try:
         while True:
@@ -79,6 +82,13 @@ def main():
             else:
                change_filter = input("Wrong input!\nPlease enter (y/n): ") 
 
+    
+        # Creates results directory
+        run_dir = f"results_({FREQ}_{COVERAGE}_{BASECOUNT})_{date_time_str}"
+        res_dir = r"./Filter_Usecase/results/" + run_dir
+        if not os.path.exists(res_dir):
+            os.makedirs(res_dir)
+
         ind = 0
         for i, curr_row in all_patients_df.iterrows():
 
@@ -123,16 +133,19 @@ def main():
             results_df.loc[ind, "Date"] = curr_row["sampling date"]
             results_df.loc[ind, "Ct"] = curr_row["mean_ct"]
             
+            # Create specific result dur for patient/timepoint
+            specific_res_dir = f"{res_dir}/{curr_patient_id}/{curr_timepoint}"
+            os.makedirs(specific_res_dir)
+            
             # filter timepoint and update data to results
-            usecase_df, num_of_mut_rep1, num_of_mut_rep2, num_of_mut_merged, num_of_mut_merged_all = ff.filter(s1_rep1, s1_rep2, curr_patient_id, curr_timepoint, FREQ, COVERAGE, BASECOUNT, protein_dict)
+            usecase_df, num_of_mut_rep1, num_of_mut_rep2, num_of_mut_merged, num_of_mut_merged_all = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
             results_df.loc[ind, "total_mutations_Before_Filtering_rep1"] = num_of_mut_rep1
             results_df.loc[ind, "total_mutations_Before_Filtering_rep2"] = num_of_mut_rep2
             results_df.loc[ind, "total_mutations_Before_Filtering_merged"] = num_of_mut_merged_all
             results_df.loc[ind, "total_mutations_After_Filtering_merged"] = num_of_mut_merged
             
             # Update usecases statistics
-            us_col_list = ["UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
-            results_df = usecase_calc(usecase_df, results_df, us_col_list, ind, num_of_mut_merged)
+            results_df = usecase_calc(usecase_df, results_df, ind, num_of_mut_merged)
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/Results.csv", index=False)

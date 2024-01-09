@@ -136,6 +136,10 @@ def automatic_exact():
             print(f"-----------PATIENT {patient[-2:]}-----------")
             txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
             
+            # Skip N8 patient until we figure out the problem
+            if "N8" in patient:
+                continue
+            
             # Run R for file per patient
             for file in txt_files:
                 command_line = f'{method} "{file}" {params}'

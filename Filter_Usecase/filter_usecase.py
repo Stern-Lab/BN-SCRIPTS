@@ -75,15 +75,16 @@ def main():
                 COVERAGE = 100
                 BASECOUNT = 50
                 break
+
             elif (change_filter == "y"):
-                FREQ = float(input("Minimal Frequnecy = "))
-                COVERAGE = int(input("Minimal Coverage = "))
-                BASECOUNT = int(input("Minimal Basecount = "))
+                FREQ = float(input("Minimal Frequnecy: "))
+                COVERAGE = int(input("Minimal Coverage: "))
+                BASECOUNT = int(input("Minimal Basecount: "))
                 break
+
             else:
                change_filter = input("Wrong input!\nPlease enter (y/n): ") 
 
-    
         # Creates results directory
         run_dir = f"results_({FREQ}_{COVERAGE}_{BASECOUNT})_{date_time_str}"
         res_dir = r"./Filter_Usecase/results/" + run_dir
@@ -117,11 +118,13 @@ def main():
             # Find replicate1 file
             s1_rep1, found = get_freq_file(curr_sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4)
             if not (found):
+                print("Rep1 not found")
                 continue
             
             # Find replicate2 file
             s1_rep2, found = get_freq_file(curr_sample_id + "_L001", v3_dirs, v4_dirs, PATH_V3, PATH_V4)
             if not (found):
+                print("Rep2 not found")
                 continue
             
             # Update index

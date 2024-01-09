@@ -20,12 +20,13 @@ def get_freq_file(sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4):
         return "", False
 
 def usecase_calc(uc_df, res_df, ind, mut_cnt):
-    cols_list = uc_df["UseCaseGroup"].value_counts().index.tolist()
-    for col in cols_list:
-        res_df.loc[ind, f"UC{col}_freq"] = 0
+    cols_list = ["UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
 
     for col in cols_list:
-        res_df.loc[ind, f"UC{col}_freq"] = (uc_df["UseCaseGroup"].value_counts()[col])/mut_cnt
+        res_df.loc[ind, col] = 0
+
+    for key in uc_df["UseCaseGroup"].value_counts().index.tolist():
+        res_df.loc[ind, f"UC{key}_freq"] = (uc_df["UseCaseGroup"].value_counts()[key])/mut_cnt
 
     res_df.loc[ind, "criticalDelta_cnt"] = len(uc_df[uc_df["CriticalDelta"] != "No"])
     return res_df

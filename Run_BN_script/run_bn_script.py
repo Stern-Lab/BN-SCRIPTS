@@ -81,6 +81,10 @@ def user_main():
             print(f"-----------PATIENT {patient[-2:]}-----------")
             txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
             
+            # Skip N8 patient until we figure out the problem
+            if "N8" in patient:
+                continue
+
             # Run R for file per patient
             for file in txt_files:
                 command_line = f'{method} "{file}" {params}'
@@ -90,9 +94,9 @@ def user_main():
 
                 # Check for errors
                 if error:
-                    print(f"Error occurred:\n {error.decode('utf-8')}")
+                    print(f"Error occurred! (python)\n {error.decode('utf-8')}")
                 else:
-                    print(f"R script executed successfully:\n {output.decode('utf-8')}")
+                    print(f"R script executed successfully (python)\n {output.decode('utf-8')}")
     
     except Exception as e:
         print("An error has occured!\nTerminating script...")

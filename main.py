@@ -39,5 +39,5 @@ if __name__ == "__main__":
         print(e)
         exit(1)
 
-    print("====Main Script finished successfuly!====")
+    print("====Main Script finished successfully!====")
     print(f"Main Script elapsed time: {(time.time() - start)} sec")

@@ -60,7 +60,7 @@ def new_freq_insert(rep_df, coverage, freq, base_count):
     for ind, row in rep_df.iterrows():
         if row["coverage"] <= coverage:
             if row["frequency"] <= freq:
-                rep_df.loc[ind, "new_freq"] = "***"
+                rep_df.loc[ind, "new_freq"] = "X"
 
             elif row["frequency"] > freq:
                 rep_df.loc[ind, "new_freq"] = -1
@@ -75,6 +75,9 @@ def new_freq_insert(rep_df, coverage, freq, base_count):
                 elif row["base_count"] > base_count:
                     rep_df.loc[ind, "new_freq"] = row["frequency"]
     return rep_df
+
+def final_freq_calc(freq1, freq2, coverage, freq, base_count):
+    
 
 
 def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
@@ -94,16 +97,23 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     num_of_mut_rep1 = rep1_df_all.shape[0]
     num_of_mut_rep2 = rep2_df_all.shape[0]
     
+    # Save all mutation except ref and PROBLEMATIC
     rep1_df = rep1_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep1_df["new_freq"] = "???"
+    rep1_df.to_csv(f"{result_dir}/freq1_all_mutations.csv", index=False)
     rep2_df = rep2_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep2_df["new_freq"] = "???"
+    rep2_df.to_csv(f"{result_dir}/freq2_all_mutations.csv", index=False)
+
+    # Insert new frequency to each mutation according to each file independently
+    rep1_df["new_freq"] = "new"
+    rep2_df["new_freq"] = "new"
+
+    new_rep1_df = new_freq_insert(rep1_df, coverage, freq, base_count)
+    new_rep2_df = new_freq_insert(rep2_df, coverage, freq, base_count)
     
-    u_rep1_df = new_freq_insert(rep1_df, coverage, freq, base_count)
-    u_rep2_df = new_freq_insert(rep2_df, coverage, freq, base_count)
+    new_rep1_df.to_csv(f"{result_dir}/freq1_independent.csv", index=False)
+    new_rep2_df.to_csv(f"{result_dir}/freq2_independent.csv", index=False)
     
-    u_rep1_df.to_csv(f"{result_dir}/mut_freq_1.csv", index=False)
-    u_rep2_df.to_csv(f"{result_dir}/mut_freq_2.csv", index=False)
+    # Insert new frequency to each mutation according to both freqs
 
 
     # Create DF for next phase (BN algorithem)
@@ -112,7 +122,7 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     
     filtered_rep2 = rep2_df[["mutation", "frequency"]]
     filtered_rep2.to_csv(f"{result_dir}/mut_freq_4.csv", index=False)
-
+    indepandent = 
     # Merge data framse based on common mutation after filtering
     merged_df = pd.merge(rep1_df, rep2_df, how="inner", on="mutation")
     merged_all_df = pd.merge(rep1_df_all, rep2_df_all, how="inner", on="mutation")

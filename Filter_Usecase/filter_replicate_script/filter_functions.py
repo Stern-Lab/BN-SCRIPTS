@@ -56,28 +56,53 @@ def filter_non_mutations(df):
     ret_df = df.loc[(df['ref_base'] != df['read_base'])]
     return ret_df[~ret_df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
+def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
+    return (bs1 + bs2) / (cvg1 + cvg2)
+
 def new_freq_insert(rep_df, coverage, freq, base_count):
     for ind, row in rep_df.iterrows():
-        if row["coverage"] <= coverage:
-            if row["frequency"] <= freq:
-                rep_df.loc[ind, "new_freq"] = "X"
-
-            elif row["frequency"] > freq:
-                rep_df.loc[ind, "new_freq"] = -1
+        if row["coverage"] < coverage:
+            rep_df.loc[ind, "new_freq"] = -1
         
-        elif row["coverage"] > coverage:
-            if row["frequency"] <= freq:
+        elif row["coverage"] >= coverage:
+            if row["frequency"] < freq:
                 rep_df.loc[ind, "new_freq"] = 0
 
-            elif row["frequency"] > freq:
+            elif row["frequency"] >= freq:
                 if row["base_count"] < base_count:
                     rep_df.loc[ind, "new_freq"] = -1
                 elif row["base_count"] > base_count:
                     rep_df.loc[ind, "new_freq"] = row["frequency"]
     return rep_df
 
-def final_freq_calc(freq1, freq2, coverage, freq, base_count):
+def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
+    # Merge df inner method
+    merged_df = pd.merge(freq1, freq2, on="mutation", how="inner")
     
+    # Add protein (mutation type) column
+    merged_df["mutation_type"] = ""
+    
+    # Add final frequency column
+    merged_df["final_freq"] = "new"
+
+    for ind, row in merged_df.iterrows():
+        if row["mutation"] in protein_dict:
+            merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
+
+        diff = abs(float(row["new_freq_x"]) - float(row["new_freq_y"]))
+        
+        if (row["new_freq_x"] == -1) or (row["new_freq_y"] == -1):
+            merged_df.loc[ind, "final_freq"] = -1
+        else:
+            if (row["new_freq_x"] == 0) and (row["new_freq_y"] == 0):
+                merged_df.loc[ind, "final_freq"] = 0
+            else:
+                if diff <= 0.3:
+                    merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], row["coverage_x"], row["coverage_y"])
+                else:
+                    merged_df.loc[ind, "final_freq"] = -1
+
+    return merged_df
 
 
 def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
@@ -114,32 +139,9 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     new_rep2_df.to_csv(f"{result_dir}/freq2_independent.csv", index=False)
     
     # Insert new frequency to each mutation according to both freqs
-
+    merged_df = final_freq_calc(new_rep1_df, new_rep2_df, coverage, freq, base_count, protein_dict)
+    merged_df.to_csv(f"{result_dir}/merged.csv", index=False)
 
     # Create DF for next phase (BN algorithem)
-    filtered_rep1 = rep1_df[["mutation", "frequency"]]
-    filtered_rep1.to_csv(f"{result_dir}/mut_freq_3.csv", index=False)
-    
-    filtered_rep2 = rep2_df[["mutation", "frequency"]]
-    filtered_rep2.to_csv(f"{result_dir}/mut_freq_4.csv", index=False)
-    indepandent = 
-    # Merge data framse based on common mutation after filtering
-    merged_df = pd.merge(rep1_df, rep2_df, how="inner", on="mutation")
-    merged_all_df = pd.merge(rep1_df_all, rep2_df_all, how="inner", on="mutation")
-    num_of_mut_merged = merged_df.shape[0]
-    num_of_mut_merged_all = merged_all_df.shape[0]
-    
-    # Add protein (mutation type) column
-    merged_df["mutation_type"] = ""
-
-    # Usecase submitting
-    for ind, row in merged_df.iterrows():
-        rep1_freq = row['frequency_x']
-        rep2_freq = row['frequency_y']
-        if row['mutation'] in protein_dict:
-            merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
-
-        big_freq = max(rep1_freq, rep2_freq)
-        small_freq = min(rep1_freq, rep2_freq)
-    
-    return usecase_df, 1, 1, 1, 1
+    final_df = merged_df[["mutation", "final_freq"]]
+    final_df.to_csv(f"{result_dir}/frequnecies.csv", index=False)

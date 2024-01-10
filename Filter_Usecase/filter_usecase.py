@@ -142,14 +142,14 @@ def main():
             os.makedirs(specific_res_dir)
             
             # filter timepoint and update data to results
-            usecase_df, num_of_mut_rep1, num_of_mut_rep2, num_of_mut_merged, num_of_mut_merged_all = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
-            results_df.loc[ind, "total_mutations_Before_Filtering_rep1"] = num_of_mut_rep1
-            results_df.loc[ind, "total_mutations_Before_Filtering_rep2"] = num_of_mut_rep2
-            results_df.loc[ind, "total_mutations_Before_Filtering_merged"] = num_of_mut_merged_all
-            results_df.loc[ind, "total_mutations_After_Filtering_merged"] = num_of_mut_merged
+            ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
+            # results_df.loc[ind, "total_mutations_Before_Filtering_rep1"] = num_of_mut_rep1
+            # results_df.loc[ind, "total_mutations_Before_Filtering_rep2"] = num_of_mut_rep2
+            # results_df.loc[ind, "total_mutations_Before_Filtering_merged"] = num_of_mut_merged_all
+            # results_df.loc[ind, "total_mutations_After_Filtering_merged"] = num_of_mut_merged
             
-            # Update usecases statistics
-            results_df = usecase_calc(usecase_df, results_df, ind, num_of_mut_merged)
+            # # Update usecases statistics
+            # results_df = usecase_calc(usecase_df, results_df, ind, num_of_mut_merged)
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/Results.csv", index=False)

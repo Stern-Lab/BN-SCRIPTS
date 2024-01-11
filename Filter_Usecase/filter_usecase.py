@@ -58,9 +58,7 @@ def main():
         protein_dict = prot.create_protein_dict() # Protein dictionary
         all_patients_df = pd.read_csv(PATIENTS) # Load patients data
         sample_size = all_patients_df.shape[0]
-        res_cols = ["Patient", "Timepoint", "sample_ID", "Date","Ct", "total_mutations_Before_Filtering_rep1", "total_mutations_Before_Filtering_rep2",
-                    "total_mutations_Before_Filtering_merged", "total_mutations_After_Filtering_merged","criticalDelta_cnt", "UC1_freq", "UC2_freq",
-                    "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
+        res_cols = ["Patient", "Timepoint", "sample_ID", "Date","Ct", "total_merged_mutations", "merged_mutations_with_f", "merged_mutations_NA", "merged_mutations_0"]
         results_df = pd.DataFrame(columns=res_cols) # Create results data frame
         
         # Get list of all directories
@@ -118,13 +116,13 @@ def main():
             # Find replicate1 file
             s1_rep1, found = get_freq_file(curr_sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4)
             if not (found):
-                print("Rep1 not found")
+                print("Replicate1 wasn't found. Skipping iteration...")
                 continue
             
             # Find replicate2 file
             s1_rep2, found = get_freq_file(curr_sample_id + "_L001", v3_dirs, v4_dirs, PATH_V3, PATH_V4)
             if not (found):
-                print("Rep2 not found")
+                print("Replicate2 wasn't found. Skipping iteration...")
                 continue
             
             # Update index
@@ -142,14 +140,11 @@ def main():
             os.makedirs(specific_res_dir)
             
             # filter timepoint and update data to results
-            ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
-            # results_df.loc[ind, "total_mutations_Before_Filtering_rep1"] = num_of_mut_rep1
-            # results_df.loc[ind, "total_mutations_Before_Filtering_rep2"] = num_of_mut_rep2
-            # results_df.loc[ind, "total_mutations_Before_Filtering_merged"] = num_of_mut_merged_all
-            # results_df.loc[ind, "total_mutations_After_Filtering_merged"] = num_of_mut_merged
-            
-            # # Update usecases statistics
-            # results_df = usecase_calc(usecase_df, results_df, ind, num_of_mut_merged)
+            total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
+            results_df.loc[ind, "total_merged_mutations"] = total_merged_mutations
+            results_df.loc[ind, "merged_mutations_with_f"] = merged_mutations_with_f
+            results_df.loc[ind, "merged_mutations_NA"] = merged_mutations_NA
+            results_df.loc[ind, "merged_mutations_0"] = merged_mutations_0
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/Results.csv", index=False)

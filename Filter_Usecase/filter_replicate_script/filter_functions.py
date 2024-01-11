@@ -71,7 +71,7 @@ def new_freq_insert(rep_df, coverage, freq, base_count):
             elif row["frequency"] >= freq:
                 if row["base_count"] < base_count:
                     rep_df.loc[ind, "new_freq"] = -1
-                elif row["base_count"] > base_count:
+                elif row["base_count"] >= base_count:
                     rep_df.loc[ind, "new_freq"] = row["frequency"]
     return rep_df
 
@@ -88,16 +88,22 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
     for ind, row in merged_df.iterrows():
         if row["mutation"] in protein_dict:
             merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
-
-        diff = abs(float(row["new_freq_x"]) - float(row["new_freq_y"]))
+        freq1 = float(row["new_freq_x"])
+        freq2 = float(row["new_freq_y"])
+        diff = abs(freq1 - freq2)
         
-        if (row["new_freq_x"] == -1) or (row["new_freq_y"] == -1):
+        if (freq1 == -1) or (freq2 == -1):
             merged_df.loc[ind, "final_freq"] = -1
         else:
-            if (row["new_freq_x"] == 0) and (row["new_freq_y"] == 0):
+            if (freq1 == 0) and (freq2 == 0):
                 merged_df.loc[ind, "final_freq"] = 0
             else:
-                if diff <= 0.3:
+                if (freq1 < 0.5) and (freq2 < 0.5):
+                    diff_lim = 0.1
+                else:
+                    diff_lim = 0.3
+                
+                if diff <= diff_lim:
                     merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], row["coverage_x"], row["coverage_y"])
                 else:
                     merged_df.loc[ind, "final_freq"] = -1
@@ -135,8 +141,8 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     new_rep1_df = new_freq_insert(rep1_df, coverage, freq, base_count)
     new_rep2_df = new_freq_insert(rep2_df, coverage, freq, base_count)
     
-    new_rep1_df.to_csv(f"{result_dir}/freq1_independent.csv", index=False)
-    new_rep2_df.to_csv(f"{result_dir}/freq2_independent.csv", index=False)
+    new_rep1_df.to_csv(f"{result_dir}/freq1_independent_filtering.csv", index=False)
+    new_rep2_df.to_csv(f"{result_dir}/freq2_independent_filtering.csv", index=False)
     
     # Insert new frequency to each mutation according to both freqs
     merged_df = final_freq_calc(new_rep1_df, new_rep2_df, coverage, freq, base_count, protein_dict)
@@ -145,3 +151,5 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     # Create DF for next phase (BN algorithem)
     final_df = merged_df[["mutation", "final_freq"]]
     final_df.to_csv(f"{result_dir}/frequnecies.csv", index=False)
+
+    return final_df.shape[0], final_df[final_df["final_freq"] == -1], final_df[final_df["final_freq"] == 0],  final_df[final_df["final_freq"] != 0 & final_df["final_freq"] != -1]

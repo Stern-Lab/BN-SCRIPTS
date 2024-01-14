@@ -14,26 +14,7 @@ def get_res_dir():
             break
         else:
             user_input = input("Wrong input please try again\nEnter 1 for cluster and 2 for local run: ")
-    return RESULTS
-
-def get_user_usecase():
-    uc_list = []
-    while True:
-        num = input("Enter D for default (1,3,4,6) or usecase (1 to 7) that will be considered in calculation and 0 when finished: ")
-        
-        if num == "0":
-            print(f"Usecases that will be used are {uc_list}")
-            break
-        elif num == "D":
-            uc_list = [1,3,4,6]
-            print(f"Usecases that will be used are {uc_list}")
-            break
-        else:
-            if (num in ["1", "2", "3", "4", "5", "6", "7"] and int(num) not in uc_list):
-                uc_list.append(int(num))
-            else:
-                print("Wrong input! Enter again...")
-    return uc_list 
+    return RESULTS 
 
 def get_bn_prep_files(directory, patient_id, timepoint):
     newest_modified_time = None
@@ -43,7 +24,7 @@ def get_bn_prep_files(directory, patient_id, timepoint):
             if (newest_modified_time is None) or (modified_time > newest_modified_time):
                     newest_modified_directory = dir
                     newest_modified_time = modified_time
-    return f"{newest_modified_directory}/usecase.csv"
+    return f"{newest_modified_directory}/frequnecies.csv"
 
 def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
     return (bs1 + bs2) / (cvg1 + cvg2)
@@ -58,9 +39,6 @@ def main():
         
         all_samples = pd.read_csv(f"{RESULTS}/Results.csv")
         sample_size = all_samples.shape[0]
-
-        # Get from user the usecases he want to work with
-        uc_list = get_user_usecase()
 
         # Update results data frame with all inforamtion needed
         ind = 0

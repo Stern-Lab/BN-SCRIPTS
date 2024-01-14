@@ -111,7 +111,6 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
 
     return merged_df
 
-
 def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     # Read file & add columns & filter mutations to each pair of replica's freqs file
     

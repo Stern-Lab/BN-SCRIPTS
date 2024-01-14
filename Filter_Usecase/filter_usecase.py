@@ -6,11 +6,10 @@ import pandas as pd
 import numpy as np
 import os
 
-def get_freq_file(sample_id, rep_dirs, REP_PATH):
+def get_freq_file(sample_id, rep_dirs, rep_path):
     if sample_id in rep_dirs:
-        freq_file = REP_PATH + "/" + sample_id + "/freqs.tsv"
+        freq_file = rep_path + "/" + sample_id + "/freqs.tsv"
         return freq_file, True
-    
     else:
         print(f"Directory {sample_id} wasn't found in V3 or V4. Skipping...")
         return "", False

@@ -104,7 +104,7 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
                 else:
                     diff_limit = 0.3
                 
-                if diff <= diff_limit: # Check if frequnecies diff in limit and calculate weighted avg, else NA
+                if diff <= diff_limit: # Check if frequnecies diff in limit and calculate weighted avg else NA
                     merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], row["coverage_x"], row["coverage_y"])
                 else:
                     merged_df.loc[ind, "final_freq"] = -1
@@ -152,5 +152,6 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     # Create DF for next phase (BN algorithem)
     final_df = merged_df[["mutation", "final_freq"]]
     final_df.to_csv(f"{result_dir}/frequnecies.csv", index=False)
-
-    return final_df.shape[0], final_df[final_df["final_freq"] == -1], final_df[final_df["final_freq"] == 0],  final_df[(final_df["final_freq"] != 0) & (final_df["final_freq"] != -1)]
+    
+    # Return number of each frequncy type (totatl, NA, 0, W_avg)
+    return final_df.shape[0], (final_df["final_freq"] == -1).sum(), (final_df["final_freq"] == 0).sum(), (final_df["final_freq"] > 0).sum()

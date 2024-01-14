@@ -31,7 +31,7 @@ def usecase_calc(uc_df, res_df, ind, mut_cnt):
     res_df.loc[ind, "criticalDelta_cnt"] = len(uc_df[uc_df["CriticalDelta"] != "No"])
     return res_df
 
-def main():
+def main(bool=False):
     print("Data filtering and Usecase table creation script is starting...")
     date_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     print(date_time_str)
@@ -39,7 +39,10 @@ def main():
     start = time.time()
     try:
         while True:
-            user_input = input("Enter 1 for cluster and 2 for local run: ")
+            if bool:
+                user_input = "1"
+            else:
+                user_input = input("Enter 1 for cluster and 2 for local run: ")
             
             # Prepartion actions
             if (user_input == "1"):
@@ -66,7 +69,11 @@ def main():
         v4_dirs = os.listdir(PATH_V4)
 
         # Update results data frame with all inforamtion needed
-        change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to change filtering parameters (y/n)? ")
+        if bool:
+            change_filter = "n"
+        else:
+            change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to change filtering parameters (y/n)? ")
+        
         while True:
             if (change_filter == "n"):
                 FREQ = 0.01
@@ -145,6 +152,9 @@ def main():
             results_df.loc[ind, "merged_mutations_with_f"] = merged_mutations_with_f
             results_df.loc[ind, "merged_mutations_NA"] = merged_mutations_NA
             results_df.loc[ind, "merged_mutations_0"] = merged_mutations_0
+
+            if (total_merged_mutations != merged_mutations_with_f+merged_mutations_NA+merged_mutations_0):
+                print("***Error***\nIn decision tree, there is a case that's not covered!!!")
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/Results.csv", index=False)
@@ -158,3 +168,7 @@ def main():
 
     print("***Filter Script finished successfully!***")
     print(f"Script elapsed time: {(time.time() - start)} sec")
+
+
+if __name__ == "__main__":
+    main(True)

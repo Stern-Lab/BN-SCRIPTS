@@ -6,13 +6,9 @@ import pandas as pd
 import numpy as np
 import os
 
-def get_freq_file(sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4):
-    if sample_id in v3_dirs:
-        freq_file = PATH_V3 + "/" + sample_id + "/freqs.tsv"
-        return freq_file, True
-
-    elif sample_id in v4_dirs:
-        freq_file = PATH_V4 + "/" + sample_id + "/freqs.tsv"
+def get_freq_file(sample_id, rep_dirs, REP_PATH):
+    if sample_id in rep_dirs:
+        freq_file = REP_PATH + "/" + sample_id + "/freqs.tsv"
         return freq_file, True
     
     else:
@@ -46,13 +42,11 @@ def main(bool=False):
             
             # Prepartion actions
             if (user_input == "1"):
-                PATH_V3 = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3"
-                PATH_V4 = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V4"
+                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
                 PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             elif (user_input == "2"):
-                PATH_V3 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3"
-                PATH_V4 = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V4"
+                REP_PATH = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
                 PATIENTS = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             else:
@@ -65,8 +59,7 @@ def main(bool=False):
         results_df = pd.DataFrame(columns=res_cols) # Create results data frame
         
         # Get list of all directories
-        v3_dirs = os.listdir(PATH_V3)
-        v4_dirs = os.listdir(PATH_V4)
+        replicate_dirs = os.listdir(REP_PATH)
 
         # Update results data frame with all inforamtion needed
         if bool:
@@ -121,13 +114,13 @@ def main(bool=False):
             print(f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.")
             
             # Find replicate1 file
-            s1_rep1, found = get_freq_file(curr_sample_id, v3_dirs, v4_dirs, PATH_V3, PATH_V4)
+            s1_rep1, found = get_freq_file(curr_sample_id, replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate1 wasn't found. Skipping iteration...")
                 continue
             
             # Find replicate2 file
-            s1_rep2, found = get_freq_file(curr_sample_id + "_L001", v3_dirs, v4_dirs, PATH_V3, PATH_V4)
+            s1_rep2, found = get_freq_file(curr_sample_id + "_L001", replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate2 wasn't found. Skipping iteration...")
                 continue

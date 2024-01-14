@@ -88,22 +88,23 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
     for ind, row in merged_df.iterrows():
         if row["mutation"] in protein_dict:
             merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
+        
         freq1 = float(row["new_freq_x"])
         freq2 = float(row["new_freq_y"])
         diff = abs(freq1 - freq2)
         
-        if (freq1 == -1) or (freq2 == -1):
+        if (freq1 == -1) or (freq2 == -1): # If one of the replicate's frequnecies NA
             merged_df.loc[ind, "final_freq"] = -1
         else:
-            if (freq1 == 0) and (freq2 == 0):
+            if (freq1 == 0) and (freq2 == 0): # If both replicate's frequnecies are zero
                 merged_df.loc[ind, "final_freq"] = 0
             else:
-                if (freq1 < 0.5) and (freq2 < 0.5):
-                    diff_lim = 0.1
+                if (freq1 < 0.5) and (freq2 < 0.5): # If both replicate's frequnecies are low difference limit is 0.1, else 0.3
+                    diff_limit = 0.1
                 else:
-                    diff_lim = 0.3
+                    diff_limit = 0.3
                 
-                if diff <= diff_lim:
+                if diff <= diff_limit: # Check if frequnecies diff in limit and calculate weighted avg, else NA
                     merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], row["coverage_x"], row["coverage_y"])
                 else:
                     merged_df.loc[ind, "final_freq"] = -1
@@ -152,4 +153,4 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     final_df = merged_df[["mutation", "final_freq"]]
     final_df.to_csv(f"{result_dir}/frequnecies.csv", index=False)
 
-    return final_df.shape[0], final_df[final_df["final_freq"] == -1], final_df[final_df["final_freq"] == 0],  final_df[final_df["final_freq"] != 0 & final_df["final_freq"] != -1]
+    return final_df.shape[0], final_df[final_df["final_freq"] == -1], final_df[final_df["final_freq"] == 0],  final_df[(final_df["final_freq"] != 0) & (final_df["final_freq"] != -1)]

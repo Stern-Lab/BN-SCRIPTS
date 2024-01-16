@@ -7,27 +7,33 @@ def get_res_dir():
     while True:
         user_input = input("Enter 1 for cluster and 2 for local run: ")
         if (user_input == "1"):
-            RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/Filter_Usecase"
+            RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/Filter_Usecase/results"
             break
         elif (user_input == "2"):
-            RESULTS = r"Z:/home/volume1/ido/BN-SCRIPTS/Filter_Usecase"
+            RESULTS = r"Z:\home\volume1\ido\BN-SCRIPTS\Filter_Usecase\results"
             break
         else:
             user_input = input("Wrong input please try again\nEnter 1 for cluster and 2 for local run: ")
     return RESULTS 
 
-def get_bn_prep_files(directory, patient_id, timepoint):
+def get_bn_prep_files(root, patient_id, timepoint):
+    """
+    input: root folder
+    output: latest modified subdirectory from level 1
+    """
     newest_modified_time = None
     newest_modified_directory = ""
-    for dir, _, files in os.walk(f"{directory}/results/{patient_id}/{timepoint}"):
-            modified_time = os.path.getmtime(dir)
-            if (newest_modified_time is None) or (modified_time > newest_modified_time):
-                    newest_modified_directory = dir
-                    newest_modified_time = modified_time
-    return f"{newest_modified_directory}/frequnecies.csv"
-
-def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
-    return (bs1 + bs2) / (cvg1 + cvg2)
+    # Get a list of all items (files and directories) in the specified directory
+    all_items = os.listdir(root)
+    # Filter out only directories
+    directories = [item for item in all_items if os.path.isdir(os.path.join(root, item))]
+    for subdir in directories:
+        full_path = os.path.join(root, subdir)
+        modified_time = os.path.getmtime(full_path)
+        if (newest_modified_time is None) or (modified_time > newest_modified_time):
+                newest_modified_directory = full_path
+                newest_modified_time = modified_time
+    return f"{newest_modified_directory}/{patient_id}/{timepoint}/frequnecies.csv"
 
 def main():
     print("BN prepartion files script is starting...")
@@ -37,7 +43,7 @@ def main():
     try:
         RESULTS = get_res_dir()
         
-        all_samples = pd.read_csv(f"{RESULTS}/Results.csv")
+        all_samples = pd.read_csv(RESULTS + "\Results.csv")
         sample_size = all_samples.shape[0]
 
         # Update results data frame with all inforamtion needed
@@ -70,7 +76,7 @@ def main():
             t2_df = pd.read_csv(t2_results)
 
             # Keep mutations that appears in both time points
-            merged_df = pd.merge(t1_df, t2_df, how= 'inner', on= 'mutation')
+            merged_df = pd.merge(t1_df, t2_df, how='outer', on= 'mutation') # Ask Natalie
 
             # Re-organize DF (change column's name)
             merged_df.drop(['ref_pos_x_y', 'mutation_type_y'], inplace=True, axis=1)

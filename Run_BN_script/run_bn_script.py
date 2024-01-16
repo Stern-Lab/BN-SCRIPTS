@@ -23,7 +23,11 @@ def get_latest_res_dir(root):
     """
     newest_modified_time = None
     newest_modified_directory = ""
-    for subdir in os.listdir(root):
+    # Get a list of all items (files and directories) in the specified directory
+    all_items = os.listdir(root)
+    # Filter out only directories
+    directories = [item for item in all_items if os.path.isdir(os.path.join(root, item))]
+    for subdir in directories:
         full_path = os.path.join(root, subdir)
         modified_time = os.path.getmtime(full_path)
         if (newest_modified_time is None) or (modified_time > newest_modified_time):

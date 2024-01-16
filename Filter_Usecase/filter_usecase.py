@@ -11,20 +11,8 @@ def get_freq_file(sample_id, rep_dirs, rep_path):
         freq_file = rep_path + "/" + sample_id + "/freqs.tsv"
         return freq_file, True
     else:
-        print(f"Directory {sample_id} wasn't found in V3 or V4. Skipping...")
+        print(f"Directory {sample_id} wasn't found in first_timepoint_as_reference. Skipping...")
         return "", False
-
-def usecase_calc(uc_df, res_df, ind, mut_cnt):
-    cols_list = ["UC1_freq", "UC2_freq", "UC3_freq", "UC4_freq", "UC5_freq", "UC6_freq", "UC7_freq"]
-
-    for col in cols_list:
-        res_df.loc[ind, col] = 0
-
-    for key in uc_df["UseCaseGroup"].value_counts().index.tolist():
-        res_df.loc[ind, f"UC{key}_freq"] = (uc_df["UseCaseGroup"].value_counts()[key])/mut_cnt
-
-    res_df.loc[ind, "criticalDelta_cnt"] = len(uc_df[uc_df["CriticalDelta"] != "No"])
-    return res_df
 
 def main(bool=False):
     print("Data filtering and Usecase table creation script is starting...")
@@ -149,7 +137,7 @@ def main(bool=False):
                 print("***Error***\nIn decision tree, there is a case that's not covered!!!")
         
         # Save data frame as a file
-        results_df.to_csv(r"./Filter_Usecase/Results.csv", index=False)
+        results_df.to_csv(r"./Filter_Usecase/results/Results.csv", index=False)
     
     except Exception as e:
         print("An error has occured!\nTerminating script...")

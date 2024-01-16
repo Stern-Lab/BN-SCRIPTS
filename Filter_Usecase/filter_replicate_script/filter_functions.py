@@ -52,9 +52,12 @@ def filter_ref(df):
     """
     return df.loc[df['type'] != 'ref']
 
-def filter_non_mutations(df):
+def filter_deletion_insertion(df):
     ret_df = df.loc[df['ref_base'] != "-"]
-    ret_df = df.loc[df['read_base'] != "-"]
+    ret_df = ret_df.loc[df['read_base'] != "-"]
+    return ret_df
+
+def filter_non_mutations(df):
     ret_df = df.loc[(df['ref_base'] != df['read_base'])]
     return ret_df[~ret_df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
@@ -120,11 +123,13 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
     
     # All mutation WITHOUT FILTERING
     rep1_df_all = pd.read_csv(tsv1, sep='\t')
+    rep1_df_all = filter_deletion_insertion(rep1_df_all)
     rep1_df_all = filter_non_mutations(rep1_df_all)
     rep1_df_all = enrich_mutation(rep1_df_all)
     rep1_df_all = filter_ref(rep1_df_all)
 
     rep2_df_all = pd.read_csv(tsv2, sep='\t')
+    rep2_df_all = filter_deletion_insertion(rep2_df_all)
     rep2_df_all = filter_non_mutations(rep2_df_all)
     rep2_df_all = enrich_mutation(rep2_df_all)
     rep2_df_all = filter_ref(rep2_df_all)

@@ -103,7 +103,7 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
         else:
             if (freq1 == 0) and (freq2 == 0): # If both replicate's frequnecies are zero
                 merged_df.loc[ind, "final_freq"] = 0
-            else: # (freq1 != 0) and (freq2 != 0): # If both replicate's frequnecies are not zero
+            elif (freq1 != 0) and (freq2 != 0): # If both replicate's frequnecies are not zero
                 if (freq1 < 0.5) and (freq2 < 0.5): # If both replicate's frequnecies are low difference limit is 0.1, else 0.3
                     diff_limit = 0.1
                 else:
@@ -113,8 +113,8 @@ def final_freq_calc(freq1, freq2, coverage, freq, base_count, protein_dict):
                     merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], row["coverage_x"], row["coverage_y"])
                 else:
                     merged_df.loc[ind, "final_freq"] = -1
-            # else: # If one replicate frequnecy is zero and other one not
-            #     merged_df.loc[ind, "final_freq"] = -1
+            else: # If one replicate frequnecy is zero and other one not
+                merged_df.loc[ind, "final_freq"] = -1
 
     return merged_df
 

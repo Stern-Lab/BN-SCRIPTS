@@ -5,7 +5,8 @@ import os
 
 def get_res_dir():
     while True:
-        user_input = input("Enter 1 for cluster and 2 for local run: ")
+        # user_input = input("Enter 1 for cluster and 2 for local run: ")
+        user_input = "1"
         if (user_input == "1"):
             RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/Filter_Usecase/results"
             break
@@ -43,7 +44,7 @@ def main():
     try:
         RESULTS = get_res_dir()
         
-        all_samples = pd.read_csv(RESULTS + "\Results.csv")
+        all_samples = pd.read_csv(RESULTS + "/Results.csv")
         sample_size = all_samples.shape[0]
 
         # Update results data frame with all inforamtion needed
@@ -69,73 +70,34 @@ def main():
 
             print(f"Creating prepration files for {curr_patient_id} for timepoints {prev_timepoint} and {curr_timepoint}.")
             
-            # Find filtering and usecase results
+            # Create results directory
+            res_dir = f"./BN_Create_input/results/{run_start}/{curr_patient_id}"
+            if not os.path.exists(res_dir):
+                os.makedirs(res_dir)
+            
+            # Find filtering results
             t1_results = get_bn_prep_files(RESULTS, curr_patient_id, prev_timepoint)            
             t1_df = pd.read_csv(t1_results)
             t2_results = get_bn_prep_files(RESULTS, curr_patient_id, curr_timepoint)            
             t2_df = pd.read_csv(t2_results)
 
-            # Keep mutations that appears in both time points
+            # Keep all mutations that appears in one of the time points
             merged_df = pd.merge(t1_df, t2_df, how='outer', on= 'mutation') # Ask Natalie
+            
+            # Re-organize df (change column's name)
+            merged_df.rename(columns={"final_freq_x":f"frequency_{prev_timepoint}", "final_freq_y":f"frequency_{curr_timepoint}"}, inplace=True)
 
-            # Re-organize DF (change column's name)
-            merged_df.drop(['ref_pos_x_y', 'mutation_type_y'], inplace=True, axis=1)
-            merged_df.rename(columns={"ref_pos_x_x": "ref_pos", "mutation_type_x": "mutation_type", "base_count_x_x":f"base_count_{prev_timepoint}_1",
-                                    "base_count_y_x":f"base_count_{prev_timepoint}_2", "coverage_x_x":f"coverage_{prev_timepoint}_1", "coverage_y_x":f"coverage_{prev_timepoint}_2",
-                                    "frequency_x_x":f"frequency_{prev_timepoint}_1", "frequency_y_x":f"frequency_{prev_timepoint}_2"}, inplace=True)
-            merged_df.rename(columns={"base_count_x_y":f"base_count_{curr_timepoint}_1", "base_count_y_y":f"base_count_{curr_timepoint}_2",
-                                    "coverage_x_y":f"coverage_{curr_timepoint}_1", "coverage_y_y":f"coverage_{curr_timepoint}_2",
-                                    "frequency_x_y":f"frequency_{curr_timepoint}_1", "frequency_y_y":f"frequency_{curr_timepoint}_2"}, inplace=True)
-
-            # Save DF
-            res_dir = f"./BN_Create_input/results/{run_start}/{curr_patient_id}"
-            if not os.path.exists(res_dir):
-                os.makedirs(res_dir)
+            # Save df
             merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/merged_{prev_timepoint}_{curr_timepoint}.csv", index=False)
-
-            res_df = merged_df[['ref_pos', 'mutation', 'mutation_type', f'base_count_{prev_timepoint}_1', f'base_count_{prev_timepoint}_2',
-                                f'base_count_{curr_timepoint}_1', f'base_count_{curr_timepoint}_2', f'frequency_{prev_timepoint}_1',
-                                f'frequency_{prev_timepoint}_2', f'frequency_{curr_timepoint}_1', f'frequency_{curr_timepoint}_2',
-                                f'coverage_{prev_timepoint}_1', f'coverage_{prev_timepoint}_2', f'coverage_{curr_timepoint}_1',
-                                f'coverage_{curr_timepoint}_2', f'UseCaseGroup_x', 'UseCaseGroup_y']]
     
             # Drop mutations that's not in user's usecase choice
-            res_df = res_df[(res_df['UseCaseGroup_x'].isin(uc_list)) & (res_df['UseCaseGroup_y'].isin(uc_list))]
+            res_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != -1) & (merged_df[f'frequency_{curr_timepoint}'] != -1)]
             res_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/res_{prev_timepoint}_{curr_timepoint}.csv", index=False)
-            
-            # Add columns for final file
-            new_col1 = f"final_freq_{prev_timepoint}"
-            new_col2 = f"final_freq_{curr_timepoint}"
-            res_df[new_col1] = ""
-            res_df[new_col2] = ""
-            res_df['timepoint_2_coverage'] = ""
-            res_df['timepoint_2_basecount'] = ""
-            
-            # Calculate frequencies by Usecase
-            for i, row in res_df.iterrows():
-                # Previous time point
-                # Take weighted average for all usecases
-                final_freq1 = calc_weighted_avg(row[f'base_count_{prev_timepoint}_1'], row[f'base_count_{prev_timepoint}_2'], row[f'coverage_{prev_timepoint}_1'], row[f'coverage_{prev_timepoint}_2'])
-                
-                # Current time point
-                # Take weighted average for all usecases
-                final_freq2 = calc_weighted_avg(row[f'base_count_{curr_timepoint}_1'], row[f'base_count_{curr_timepoint}_2'], row[f'coverage_{curr_timepoint}_1'], row[f'coverage_{curr_timepoint}_2'])
+    
 
-                coverage_sum2 = (row[f'coverage_{curr_timepoint}_1'] + row[f'coverage_{curr_timepoint}_2'])
-                base_count_sum2 = (row[f'base_count_{curr_timepoint}_1'] + row[f'base_count_{curr_timepoint}_2'])
-            
-                res_df.loc[i, new_col1] = round(final_freq1, 6)
-                res_df.loc[i, new_col2] = round(final_freq2, 6)
-                res_df.loc[i, 'timepoint_2_coverage'] = coverage_sum2
-                res_df.loc[i, 'timepoint_2_basecount'] = base_count_sum2
-
-            # Save DF
-            prep_df = res_df[['mutation', new_col1, new_col2, 'timepoint_2_coverage', 'timepoint_2_basecount']]
-            prep_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/prep_{prev_timepoint}_{curr_timepoint}.csv", index=False)
-
-            # Create text file for Bottleneck Algorithem
+            # Create text file for Bottleneck algorithem
             txt = ""
-            for i, row in prep_df.iterrows():
+            for i, row in res_df.iterrows():
                 tot_coverage = str.format('{0:.6f}', row['timepoint_2_coverage'])
                 tot_base_count = str.format('{0:.6f}', row['timepoint_2_basecount'])
 

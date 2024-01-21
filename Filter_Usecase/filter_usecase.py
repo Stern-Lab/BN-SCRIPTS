@@ -25,7 +25,8 @@ def main(bool=False):
             if bool:
                 user_input = "1"
             else:
-                user_input = input("Enter 1 for cluster and 2 for local run: ")
+                # user_input = input("Enter 1 for cluster and 2 for local run: ")
+                user_input = "1"
             
             # Prepartion actions
             if (user_input == "1"):
@@ -134,7 +135,7 @@ def main(bool=False):
             results_df.loc[ind, "merged_mutations_0"] = merged_mutations_0
 
             if (total_merged_mutations != merged_mutations_with_f+merged_mutations_NA+merged_mutations_0):
-                print("***Error***\nIn decision tree, there is a case that's not covered!!!")
+                print("***Error***\nIn decision tree phase 2, there is a case that's not covered!!!")
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/results/Results.csv", index=False)

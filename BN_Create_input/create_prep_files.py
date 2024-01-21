@@ -91,17 +91,17 @@ def main():
             merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/merged_{prev_timepoint}_{curr_timepoint}.csv", index=False)
     
             # Drop mutations that's not in user's usecase choice
-            res_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != -1) & (merged_df[f'frequency_{curr_timepoint}'] != -1)]
-            res_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/res_{prev_timepoint}_{curr_timepoint}.csv", index=False)
+            merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != -1) & (merged_df[f'frequency_{curr_timepoint}'] != -1)] # Drop NA mutations
+            merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != 0) | (merged_df[f'frequency_{curr_timepoint}'] != 0)] # Drop both zero mutations
+            merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/res_{prev_timepoint}_{curr_timepoint}.csv", index=False)
     
-
-            # Create text file for Bottleneck algorithem
+            # Create text file for Bottleneck algorithm
             txt = ""
             for i, row in res_df.iterrows():
-                tot_coverage = str.format('{0:.6f}', row['timepoint_2_coverage'])
-                tot_base_count = str.format('{0:.6f}', row['timepoint_2_basecount'])
+                tot_coverage = str.format('{0:.6f}', row['tot_cov_x'])
+                tot_base_count = str.format('{0:.6f}', row['tot_cov_y'])
 
-                txt += (str.format('{0:.6f}', row[new_col1]) + "\t" + str.format('{0:.6f}',row[new_col2]) + "\t" + tot_coverage + "\t" + tot_base_count + "\n")
+                txt += (str.format('{0:.6f}', row[f'frequency_{prev_timepoint}']) + "\t" + str.format('{0:.6f}',f'frequency_{curr_timepoint}') + "\t" + tot_coverage + "\t" + tot_base_count + "\n")
 
             with open(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/frequencies_{prev_timepoint}_{curr_timepoint}.txt", 'w') as file:
                 file.write(txt)

@@ -86,6 +86,8 @@ def main():
             
             # Re-organize df (change column's name)
             merged_df.rename(columns={"final_freq_x":f"frequency_{prev_timepoint}", "final_freq_y":f"frequency_{curr_timepoint}"}, inplace=True)
+            merged_df.rename(columns={"tot_cov_x":f"tot_cov_{prev_timepoint}", "tot_cov_y":f"tot_cov_{curr_timepoint}"}, inplace=True)
+            merged_df.rename(columns={"tot_base_count_x":f"tot_base_count_{prev_timepoint}", "tot_base_count_y":f"tot_base_count_{curr_timepoint}"}, inplace=True)
 
             # Save df
             merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/merged_{prev_timepoint}_{curr_timepoint}.csv", index=False)
@@ -93,15 +95,15 @@ def main():
             # Drop mutations that's not in user's usecase choice
             merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != -1) & (merged_df[f'frequency_{curr_timepoint}'] != -1)] # Drop NA mutations
             merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != 0) | (merged_df[f'frequency_{curr_timepoint}'] != 0)] # Drop both zero mutations
-            merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/res_{prev_timepoint}_{curr_timepoint}.csv", index=False)
+            merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/final_{prev_timepoint}_{curr_timepoint}.csv", index=False)
     
             # Create text file for Bottleneck algorithm
             txt = ""
-            for i, row in res_df.iterrows():
-                tot_coverage = str.format('{0:.6f}', row['tot_cov_x'])
-                tot_base_count = str.format('{0:.6f}', row['tot_cov_y'])
+            for i, row in merged_df.iterrows():
+                t2_tot_coverage = str.format('{0:.6f}', row[f'tot_cov_{curr_timepoint}'])
+                t2_tot_base_count = str.format('{0:.6f}', row[f'tot_base_count_{curr_timepoint}'])
 
-                txt += (str.format('{0:.6f}', row[f'frequency_{prev_timepoint}']) + "\t" + str.format('{0:.6f}',f'frequency_{curr_timepoint}') + "\t" + tot_coverage + "\t" + tot_base_count + "\n")
+                txt += (str.format('{0:.6f}', row[f'frequency_{prev_timepoint}']) + "\t" + str.format('{0:.6f}',f'frequency_{curr_timepoint}') + "\t" + t2_tot_coverage + "\t" + t2_tot_base_count + "\n")
 
             with open(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/frequencies_{prev_timepoint}_{curr_timepoint}.txt", 'w') as file:
                 file.write(txt)

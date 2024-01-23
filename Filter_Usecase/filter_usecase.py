@@ -14,23 +14,24 @@ def get_freq_file(sample_id, rep_dirs, rep_path):
         print(f"Directory {sample_id} wasn't found in first_timepoint_as_reference. Skipping...")
         return "", False
 
-def main(bool=False):
+def main(ui=False):
+    log_txt = ""
     print("Data filtering and Usecase table creation script is starting...")
     date_time_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     print(date_time_str)
+    log_txt += f"Data filtering and Usecase table creation script is starting...\n{date_time_str}\n"
 
     start = time.time()
     try:
         while True:
-            if bool:
+            if ui:
                 user_input = "1"
             else:
-                # user_input = input("Enter 1 for cluster and 2 for local run: ")
-                user_input = "1"
-            
+                user_input = input("Enter 1 for cluster and 2 for local run: ")
+                
             # Prepartion actions
             if (user_input == "1"):
-                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
+                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3+V4"
                 PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             elif (user_input == "2"):
@@ -40,6 +41,9 @@ def main(bool=False):
             else:
                 user_input = input("Wrong input please try again\nEnter 1 for cluster and 2 for local run: ")
         
+        log_txt += f"Replicates path: {REP_PATH}\n"
+        log_txt += f"Patients info table path: {PATIENTS}\n"
+
         protein_dict = prot.create_protein_dict() # Protein dictionary
         all_patients_df = pd.read_csv(PATIENTS) # Load patients data
         sample_size = all_patients_df.shape[0]
@@ -49,13 +53,13 @@ def main(bool=False):
         # Get list of all directories
         replicate_dirs = os.listdir(REP_PATH)
 
-        # Update results data frame with all inforamtion needed
-        if bool:
-            change_filter = "n"
-        else:
-            change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to change filtering parameters (y/n)? ")
-        
+        # Change default params
         while True:
+            if ui:
+                change_filter = "n"
+            else:
+                change_filter = input("Defaults filtering paramters are FREQ = 0.01, COVERAGE = 100, BASECOUNT = 50.\nDo you want to change filtering parameters (y/n)? ")
+            
             if (change_filter == "n"):
                 FREQ = 0.01
                 COVERAGE = 100
@@ -70,6 +74,22 @@ def main(bool=False):
 
             else:
                change_filter = input("Wrong input!\nPlease enter (y/n): ") 
+        log_txt += f"Defaults filtering paramters are FREQ = {FREQ}, COVERAGE = {COVERAGE}, BASECOUNT = {BASECOUNT}.\n"
+        # Keep or filter 
+        while True:
+            if ui:
+                indel_input = "n"
+            else:
+                indel_input = input("Do you want to filter (remove) indels mutations?\n y/n: ")
+            
+            if (indel_input == "n"):
+                filter_indels = False
+                break
+            elif (indel_input == "y"):
+                filter_indels = True
+                break
+        
+        log_txt += f"Filtering (removing) indels: {filter_indels}"
 
         # Creates results directory
         run_dir = f"results_({FREQ}_{COVERAGE}_{BASECOUNT})_{date_time_str}"
@@ -77,6 +97,7 @@ def main(bool=False):
         if not os.path.exists(res_dir):
             os.makedirs(res_dir)
 
+        log_txt += f"Results directory: {res_dir}\n"
         ind = 0
         for i, curr_row in all_patients_df.iterrows():
 
@@ -101,16 +122,19 @@ def main(bool=False):
 
             print(f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.")
             
+            log_txt += f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.\n"
             # Find replicate1 file
             s1_rep1, found = get_freq_file(curr_sample_id, replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate1 wasn't found. Skipping iteration...")
+                log_txt += "Replicate1 wasn't found. Skipping iteration..."
                 continue
             
             # Find replicate2 file
             s1_rep2, found = get_freq_file(curr_sample_id + "_L001", replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate2 wasn't found. Skipping iteration...")
+                log_txt += "Replicate2 wasn't found. Skipping iteration..."
                 continue
             
             # Update index
@@ -128,7 +152,7 @@ def main(bool=False):
             os.makedirs(specific_res_dir)
             
             # filter timepoint and update data to results
-            total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir)
+            total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir, filter_indels)
             results_df.loc[ind, "total_merged_mutations"] = total_merged_mutations
             results_df.loc[ind, "merged_mutations_with_f"] = merged_mutations_with_f
             results_df.loc[ind, "merged_mutations_NA"] = merged_mutations_NA
@@ -139,17 +163,27 @@ def main(bool=False):
         
         # Save data frame as a file
         results_df.to_csv(r"./Filter_Usecase/results/Results.csv", index=False)
+        
+        # Save log data as a file
+        tot_time = (time.time() - start)
+        with open(res_dir + "/log.txt", 'w') as log_file:
+            log_txt += f"Script elapsed time: {tot_time} sec"
+            log_file += log_txt
+        
+        print("***Filter Script finished successfully!***")
+        print(f"Script elapsed time: {tot_time} sec")
     
     except Exception as e:
+        # Save log data as a file
+        tot_time = (time.time() - start)
+        with open(res_dir + "/log.txt", 'w') as log_file:
+            log_txt += f"Script elapsed time: {tot_time} sec"
+            log_file += log_txt
         print("An error has occured!\nTerminating script...")
-        print(f"Main script elapsed time: {(time.time() - start)} sec")
-        print("Log:")
+        print(f"Filter script elapsed time: {(time.time() - start)} sec")
+        print("Exception:")
         print(e)
         exit(1)
-
-    print("***Filter Script finished successfully!***")
-    print(f"Script elapsed time: {(time.time() - start)} sec")
-
 
 if __name__ == "__main__":
     main(True)

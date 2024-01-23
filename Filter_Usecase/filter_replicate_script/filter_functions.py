@@ -64,6 +64,16 @@ def filter_non_mutations(df):
 def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
     return (bs1 + bs2) / (cvg1 + cvg2)
 
+def phase0_filter(tsv, filter_indels):
+    rep_df_all = pd.read_csv(tsv, sep='\t')
+    if filter_indels:
+        rep1_df_all = filter_deletion_insertion(rep_df_all)
+    rep_df_all = filter_non_mutations(rep_df_all)
+    rep_df_all = enrich_mutation(rep_df_all)
+    rep_df_all = filter_ref(rep_df_all)
+
+    return rep_df_all
+
 def phase1_filter(rep_df, coverage, freq, base_count):
     for ind, row in rep_df.iterrows():
         if row["coverage"] < coverage:
@@ -128,24 +138,12 @@ def phase2_filter(freq1, freq2, protein_dict):
 
     return merged_df
 
-def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir):
+def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, filter_indels):
     # Read file & add columns & filter mutations to each pair of replica's freqs file
     
     # Phase 0 filtering
-    rep1_df_all = pd.read_csv(tsv1, sep='\t')
-    rep1_df_all = filter_deletion_insertion(rep1_df_all)
-    rep1_df_all = filter_non_mutations(rep1_df_all)
-    rep1_df_all = enrich_mutation(rep1_df_all)
-    rep1_df_all = filter_ref(rep1_df_all)
-
-    rep2_df_all = pd.read_csv(tsv2, sep='\t')
-    rep2_df_all = filter_deletion_insertion(rep2_df_all)
-    rep2_df_all = filter_non_mutations(rep2_df_all)
-    rep2_df_all = enrich_mutation(rep2_df_all)
-    rep2_df_all = filter_ref(rep2_df_all)
-    
-    num_of_mut_rep1 = rep1_df_all.shape[0]
-    num_of_mut_rep2 = rep2_df_all.shape[0]
+    rep1_df_all = phase0_filter(tsv1, filter_indels)
+    rep2_df_all = phase0_filter(tsv2, filter_indels)
     
     # Save all mutation except ref and PROBLEMATIC
     rep1_df = rep1_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()

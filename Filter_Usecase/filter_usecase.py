@@ -11,7 +11,7 @@ def get_freq_file(sample_id, rep_dirs, rep_path):
         freq_file = rep_path + "/" + sample_id + "/freqs.tsv"
         return freq_file, True
     else:
-        print(f"Directory {sample_id} wasn't found in first_timepoint_as_reference. Skipping...")
+        print(f"Directory {sample_id} wasn't found in {rep_dirs}. Skipping...")
         return "", False
 
 def main(ui=False):
@@ -152,7 +152,7 @@ def main(ui=False):
             os.makedirs(specific_res_dir)
             
             # filter timepoint and update data to results
-            total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir, filter_indels)
+            total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir, curr_patient_id, curr_timepoint, filter_indels)
             results_df.loc[ind, "total_merged_mutations"] = total_merged_mutations
             results_df.loc[ind, "merged_mutations_with_f"] = merged_mutations_with_f
             results_df.loc[ind, "merged_mutations_NA"] = merged_mutations_NA
@@ -168,7 +168,7 @@ def main(ui=False):
         tot_time = (time.time() - start)
         with open(res_dir + "/log.txt", 'w') as log_file:
             log_txt += f"Script elapsed time: {tot_time} sec"
-            log_file += log_txt
+            log_file.write(log_txt)
         
         print("***Filter Script finished successfully!***")
         print(f"Script elapsed time: {tot_time} sec")
@@ -178,7 +178,7 @@ def main(ui=False):
         tot_time = (time.time() - start)
         with open(res_dir + "/log.txt", 'w') as log_file:
             log_txt += f"Script elapsed time: {tot_time} sec"
-            log_file += log_txt
+            log_file.write(log_txt)
         print("An error has occured!\nTerminating script...")
         print(f"Filter script elapsed time: {(time.time() - start)} sec")
         print("Exception:")

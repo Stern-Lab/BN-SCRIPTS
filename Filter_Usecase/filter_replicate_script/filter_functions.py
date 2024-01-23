@@ -138,7 +138,7 @@ def phase2_filter(freq1, freq2, protein_dict):
 
     return merged_df
 
-def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, filter_indels):
+def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, patient_name, timepoint, filter_indels):
     # Read file & add columns & filter mutations to each pair of replica's freqs file
     
     # Phase 0 filtering
@@ -147,9 +147,9 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, fil
     
     # Save all mutation except ref and PROBLEMATIC
     rep1_df = rep1_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep1_df.to_csv(f"{result_dir}/freq1_all_mutations.csv", index=False)
+    rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_all_mutations.csv", index=False)
     rep2_df = rep2_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep2_df.to_csv(f"{result_dir}/freq2_all_mutations.csv", index=False)
+    rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_all_mutations.csv", index=False)
 
     # Insert new frequency to each mutation according to each file independently
     rep1_df["new_freq"] = "new"
@@ -158,18 +158,18 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, fil
     new_rep1_df = phase1_filter(rep1_df, coverage, freq, base_count)
     new_rep2_df = phase1_filter(rep2_df, coverage, freq, base_count)
     
-    new_rep1_df.to_csv(f"{result_dir}/freq1_independent_filtering.csv", index=False)
-    new_rep2_df.to_csv(f"{result_dir}/freq2_independent_filtering.csv", index=False)
+    new_rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_independent_filtering.csv", index=False)
+    new_rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_independent_filtering.csv", index=False)
     
     # Insert new frequency to each mutation according to both freqs
     merged_df = phase2_filter(new_rep1_df, new_rep2_df, protein_dict)
     if "new" in merged_df["final_freq"].unique():
         print("***Error***\nIn decision tree phase 1, there is a case that's not covered!!!")
-    merged_df.to_csv(f"{result_dir}/merged.csv", index=False)
+    merged_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_merged.csv", index=False)
 
     # Create DF for next phase (BN algorithem)
     final_df = merged_df[["mutation", "final_freq", "tot_cov", "tot_base_count"]]
-    final_df.to_csv(f"{result_dir}/frequnecies.csv", index=False)
+    final_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_frequnecies.csv", index=False)
     
     # Return number of each frequncy type (totatl, NA, 0, W_avg)
     return final_df.shape[0], (final_df["final_freq"] == -1).sum(), (final_df["final_freq"] == 0).sum(), (final_df["final_freq"] > 0).sum()

@@ -146,10 +146,10 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, pat
     rep2_df_all = phase0_filter(tsv2, filter_indels)
     
     # Save all mutation except ref and PROBLEMATIC
-    rep1_df = rep1_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_all_mutations.csv", index=False)
-    rep2_df = rep2_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency"]].copy()
-    rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_all_mutations.csv", index=False)
+    rep1_df = rep1_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency", "read_base", "base_rank"]].copy()
+    rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_phase0.csv", index=False)
+    rep2_df = rep2_df_all[["ref_pos", "mutation", "base_count", "coverage", "frequency", "read_base", "base_rank"]].copy()
+    rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_phase0.csv", index=False)
 
     # Insert new frequency to each mutation according to each file independently
     rep1_df["new_freq"] = "new"
@@ -158,8 +158,8 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, pat
     new_rep1_df = phase1_filter(rep1_df, coverage, freq, base_count)
     new_rep2_df = phase1_filter(rep2_df, coverage, freq, base_count)
     
-    new_rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_independent_filtering.csv", index=False)
-    new_rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_independent_filtering.csv", index=False)
+    new_rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_phase1.csv", index=False)
+    new_rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_phase1.csv", index=False)
     
     # Insert new frequency to each mutation according to both freqs
     merged_df = phase2_filter(new_rep1_df, new_rep2_df, protein_dict)

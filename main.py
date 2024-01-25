@@ -21,7 +21,7 @@ if __name__ == "__main__":
                 createprepfile.main()
                 break
             elif user_input == "2":
-                filterpy.main(True)
+                filterpy.main()
                 break
             elif user_input == "3":
                 createprepfile.main()

@@ -11,7 +11,7 @@ def get_freq_file(sample_id, rep_dirs, rep_path):
         freq_file = rep_path + "/" + sample_id + "/freqs.tsv"
         return freq_file, True
     else:
-        print(f"Directory {sample_id} wasn't found in {rep_dirs}. Skipping...")
+        print(f"Directory {sample_id} wasn't found in {rep_path}. Skipping...")
         return "", False
 
 def main(ui=False):
@@ -31,7 +31,8 @@ def main(ui=False):
                 
             # Prepartion actions
             if (user_input == "1"):
-                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3+V4"
+                # REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3+V4"
+                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
                 PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             elif (user_input == "2"):
@@ -80,7 +81,7 @@ def main(ui=False):
             if ui:
                 indel_input = "n"
             else:
-                indel_input = input("Do you want to filter (remove) indels mutations?\n y/n: ")
+                indel_input = input("Do you want to filter (remove) indels mutations?\n(y/n): ")
             
             if (indel_input == "n"):
                 filter_indels = False
@@ -89,7 +90,7 @@ def main(ui=False):
                 filter_indels = True
                 break
         
-        log_txt += f"Filtering (removing) indels: {filter_indels}"
+        log_txt += f"Filter (removing) indels: {filter_indels}\n"
 
         # Creates results directory
         run_dir = f"results_({FREQ}_{COVERAGE}_{BASECOUNT})_{date_time_str}"
@@ -127,14 +128,14 @@ def main(ui=False):
             s1_rep1, found = get_freq_file(curr_sample_id, replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate1 wasn't found. Skipping iteration...")
-                log_txt += "Replicate1 wasn't found. Skipping iteration..."
+                log_txt += "Replicate1 wasn't found. Skipping iteration...\n"
                 continue
             
             # Find replicate2 file
             s1_rep2, found = get_freq_file(curr_sample_id + "_L001", replicate_dirs, REP_PATH)
             if not (found):
                 print("Replicate2 wasn't found. Skipping iteration...")
-                log_txt += "Replicate2 wasn't found. Skipping iteration..."
+                log_txt += "Replicate2 wasn't found. Skipping iteration...\n"
                 continue
             
             # Update index

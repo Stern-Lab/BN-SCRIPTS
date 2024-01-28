@@ -163,7 +163,7 @@ def main(ui=False):
                 print("***Error***\nIn decision tree phase 2, there is a case that's not covered!!!")
         
         # Save data frame as a file
-        results_df.to_csv(r"./Filter_Usecase/results/Results.csv", index=False)
+        results_df.to_csv(res_dir + "/Results.csv", index=False)
         
         # Save log data as a file
         tot_time = (time.time() - start)

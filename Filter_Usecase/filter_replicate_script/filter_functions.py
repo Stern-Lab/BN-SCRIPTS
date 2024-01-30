@@ -68,7 +68,7 @@ def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
 def phase0_filter(tsv, filter_indels):
     rep_df_all = pd.read_csv(tsv, sep='\t')
     if filter_indels:
-        rep1_df_all = filter_deletion_insertion(rep_df_all)
+        rep_df_all = filter_deletion_insertion(rep_df_all)
     rep_df_all = filter_non_mutations(rep_df_all)
     rep_df_all = enrich_mutation(rep_df_all)
     rep_df_all = filter_ref(rep_df_all)

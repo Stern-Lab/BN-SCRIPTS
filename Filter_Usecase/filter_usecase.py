@@ -74,9 +74,10 @@ def main(ui=False):
                 break
 
             else:
-               change_filter = input("Wrong input!\nPlease enter (y/n): ") 
+               print("Wrong input! Please enter (y/n)") 
         log_txt += f"Defaults filtering paramters are FREQ = {FREQ}, COVERAGE = {COVERAGE}, BASECOUNT = {BASECOUNT}.\n"
-        # Keep or filter 
+        
+        # Keep or filter indels
         while True:
             if ui:
                 indel_input = "n"

@@ -81,7 +81,7 @@ def main(ui=False):
             if ui:
                 indel_input = "n"
             else:
-                indel_input = input("Do you want to filter (remove) indels mutations?\n(y/n): ")
+                indel_input = input("Do you want to filter (remove) indels mutations (y/n)? ")
             
             if (indel_input == "n"):
                 filter_indels = False

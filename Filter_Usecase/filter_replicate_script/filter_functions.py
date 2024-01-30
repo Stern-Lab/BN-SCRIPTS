@@ -59,6 +59,7 @@ def filter_deletion_insertion(df):
 
 def filter_non_mutations(df):
     ret_df = df.loc[(df['ref_base'] != df['read_base'])]
+    ret_df = df
     return ret_df[~ret_df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
 def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
@@ -90,53 +91,43 @@ def phase1_filter(rep_df, coverage, freq, base_count):
                     rep_df.loc[ind, "new_freq"] = row["frequency"]
     return rep_df
 
-def phase2_filter(freq1, freq2, protein_dict):
-    # Merge df inner method
-    merged_df = pd.merge(freq1, freq2, on="mutation", how="inner")
-    
-    # Add protein (mutation type) column
-    merged_df["mutation_type"] = ""
-    
-    # Add final frequency column
-    merged_df["final_freq"] = "new"
-    merged_df["tot_cov"] = -1
-    merged_df["tot_base_count"] = -1
-
-    for ind, row in merged_df.iterrows():
-        if row["mutation"] in protein_dict:
-            merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
+def phase2_filter_freq(freq1, freq2, basecount1, basecount2, cov1, cov2):
         
-        freq1 = float(row["new_freq_x"])
-        cov1 = int(row["coverage_x"])
-        bc1 = int(row["base_count_x"])
-        freq2 = float(row["new_freq_y"])
-        cov2 = int(row["coverage_y"])
-        bc2 = int(row["base_count_y"])
-        diff = abs(freq1 - freq2)
-        
-        if (freq1 == -1) or (freq2 == -1): # If one of the replicate's frequnecies NA
-            merged_df.loc[ind, "final_freq"] = -1
-        else:
-            if (freq1 == 0) and (freq2 == 0): # If both replicate's frequnecies are zero
-                merged_df.loc[ind, "final_freq"] = 0
-                merged_df.loc[ind, "tot_cov"] = cov1 + cov2
-                merged_df.loc[ind, "tot_base_count"] = bc1 + bc2
-            elif (freq1 != 0) and (freq2 != 0): # If both replicate's frequnecies are not zero
-                if (freq1 < 0.5) and (freq2 < 0.5): # If both replicate's frequnecies are low difference limit is 0.1, else 0.3
-                    diff_limit = 0.1
-                else:
-                    diff_limit = 0.3
-                
-                if diff <= diff_limit: # Check if frequnecies diff in limit and calculate weighted avg, else NA
-                    merged_df.loc[ind, "final_freq"] = calc_weighted_avg(row["base_count_x"], row["base_count_y"], cov1, cov2)
-                    merged_df.loc[ind, "tot_cov"] = cov1 + cov2
-                    merged_df.loc[ind, "tot_base_count"] = bc1 + bc2
-                else:
-                    merged_df.loc[ind, "final_freq"] = -1
-            else: # If one replicate frequnecy is zero and the other one isn't
-                merged_df.loc[ind, "final_freq"] = -1
+    freq1 = float(freq1)
+    cov1 = int(cov1)
+    bc1 = int(basecount1)
+    freq2 = float(freq2)
+    cov2 = int(cov2)
+    bc2 = int(basecount2)
+    diff = abs(freq1 - freq2)
+    
+    if (freq1 == -1) or (freq2 == -1): # If one of the replicate's frequnecies NA
+        return -1
+    else:
+        if (freq1 == 0) and (freq2 == 0): # If both replicate's frequnecies are zero
+            return 0
+        elif (freq1 != 0) and (freq2 != 0): # If both replicate's frequnecies are not zero
+            if (freq1 < 0.5) and (freq2 < 0.5): # If both replicate's frequnecies are low difference limit is 0.1, else 0.3
+                diff_limit = 0.1
+            else:
+                diff_limit = 0.3
+            
+            if diff <= diff_limit: # Check if frequnecies diff in limit and calculate weighted avg, else NA
+                return calc_weighted_avg(bc1, bc2, cov1, cov2)
+            else:
+                return -1
+        else: # If one replicate frequnecy is zero and the other one isn't
+            return -1
 
-    return merged_df
+def phase2_filter_cov(cov1, cov2):
+    cov1 = int(cov1)
+    cov2 = int(cov2)
+    return cov1 + cov2
+
+def phase2_filter_basecount(bc1, bc2):
+    bc1 = int(bc1)
+    bc2 = int(bc2)
+    return bc1 + bc2
 
 def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, patient_name, timepoint, filter_indels):
     # Read file & add columns & filter mutations to each pair of replica's freqs file
@@ -161,8 +152,21 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, pat
     new_rep1_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq1_phase1.csv", index=False)
     new_rep2_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_freq2_phase1.csv", index=False)
     
+    # Merge df inner method
+    merged_df = pd.merge(new_rep1_df, new_rep2_df, on="mutation", how="inner")
+    
     # Insert new frequency to each mutation according to both freqs
-    merged_df = phase2_filter(new_rep1_df, new_rep2_df, protein_dict)
+    merged_df['final_freq'] = merged_df.apply(lambda row: phase2_filter_freq(row['new_freq_x'], row['new_freq_y'],
+                                                    row['base_count_x'], row['base_count_y'], row['coverage_x'], row['coverage_y']), axis=1)
+    merged_df['tot_cov'] = merged_df.apply(lambda row: phase2_filter_cov(row['coverage_x'], row['coverage_y']), axis=1)
+    merged_df['tot_base_count'] = merged_df.apply(lambda row: phase2_filter_basecount(row['base_count_x'], row['base_count_y']), axis=1)
+    
+    # Add protein (mutation type) column
+    merged_df["mutation_type"] = ""
+    for ind, row in merged_df.iterrows():
+        if row["mutation"] in protein_dict:
+            merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
+    
     if "new" in merged_df["final_freq"].unique():
         print("***Error***\nIn decision tree phase 1, there is a case that's not covered!!!")
     merged_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_merged.csv", index=False)

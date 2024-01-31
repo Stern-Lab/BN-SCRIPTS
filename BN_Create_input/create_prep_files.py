@@ -104,7 +104,7 @@ def main():
     
             # Drop mutations that's not in user's usecase choice
             merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != -1) & (merged_df[f'frequency_{curr_timepoint}'] != -1)] # Keep mutations without NA
-            merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] >= 0.01) & (merged_df[f'frequency_{curr_timepoint}'] >= 0.01)] # Keep mutations with f>0.01
+            merged_df = merged_df[(merged_df[f'frequency_{prev_timepoint}'] != 0) | (merged_df[f'frequency_{curr_timepoint}'] != 0)] # Keep mutations if one of the freqs different than 0
             merged_df.to_csv(f"./BN_Create_input/results/{run_start}/{curr_patient_id}/final_{prev_timepoint}_{curr_timepoint}.csv", index=False)
     
             # Create text file for Bottleneck algorithm

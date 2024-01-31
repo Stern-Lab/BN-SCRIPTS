@@ -10,20 +10,20 @@ if __name__ == "__main__":
         print("Main script script is starting...")
         print(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         print("What do you want to do?")
-        print("1-Run filter and create prepartion files scripts")
-        print("2-Run only filter script")
-        print("3-Run only prepartion files scripts")
+        print("1-Run only filter script")
+        print("2-Run only prepartion files scripts")
+        print("3-Run filter and create prepartion files scripts")
         print("4-Run Bottleneck estimation R script")
         while True:
             user_input = input("Choose: ")
             if user_input == "1":
                 filterpy.main()
-                createprepfile.main()
                 break
             elif user_input == "2":
-                filterpy.main()
+                createprepfile.main()
                 break
             elif user_input == "3":
+                filterpy.main()
                 createprepfile.main()
                 break
             elif user_input == "4":

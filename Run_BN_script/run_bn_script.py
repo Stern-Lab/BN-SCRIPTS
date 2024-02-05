@@ -2,6 +2,7 @@ import os
 import subprocess
 import time
 from datetime import datetime
+import shutil
 
 def get_res_dir():
     while True:
@@ -84,10 +85,6 @@ def user_main():
         for patient in os.listdir(results_dir):
             print(f"-----------PATIENT {patient[-2:]}-----------")
             txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
-            
-            # Skip N8 patient until we figure out the problem
-            if "N8" in patient:
-                continue
 
             # Run R for file per patient
             for file in txt_files:
@@ -122,31 +119,35 @@ def automatic_exact():
 
     try:
         # Get latest results directory
-        RESULTS = r"/sternadi/home/volume1/ido/BN-SCRIPTS/BN_Create_input/results"
+        RESULTS = r"./BN_Create_input/results"
         results_dir = get_latest_res_dir(RESULTS)
-        path = RESULTS[:-35]
         
         # Choose script method excat
-        method = f"Rscript {path}/BN-SCRIPTS/Run_BN_script/BB_bottleneck-master/Bottleneck_size_estimation_exact.r --file"
+        method = f"Rscript ./Run_BN_script/BB_bottleneck-master/Bottleneck_size_estimation_exact.r --file"
         
         # Parameters
-        params = "--plot_bool TRUE --var_calling_threshold 0.03 --Nb_min 1 --Nb_max 200 --Nb_increment 1 --confidence_level .95"
+        params = "--plot_bool TRUE --var_calling_threshold 0.03 --Nb_min 1 --Nb_max 10000 --Nb_increment 1 --confidence_level .95"
         print(f"\nDefault command parameters:")
         print(params)       
         print(f"\nRESULTS DIR: {results_dir}")
                 
         # Loop through patients
-        for patient in os.listdir(results_dir):
+        for patient in [p for p in os.listdir(results_dir) if os.path.isdir(os.path.join(results_dir, p))]:
             print(f"-----------PATIENT {patient[-2:]}-----------")
-            txt_files = [f'{results_dir}/{patient}/{file}' for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
+            txt_files = [file for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
             
-            # Skip N8 patient until we figure out the problem
-            if "N8" in patient:
-                continue
+            # Create results file per patient
+            if not os.path.exists(fr"{results_dir}/{run_start}/{patient}"):
+                os.makedirs(fr"{results_dir}/BN_results/{run_start}/{patient}")
             
+            # Copy input files to results directory
+            for file in txt_files:
+                shutil.copy(f'{results_dir}/{patient}/{file}', fr"{results_dir}/BN_results/{run_start}/{patient}/{file}")
+                            
             # Run R for file per patient
             for file in txt_files:
-                command_line = f'{method} "{file}" {params}'
+                command_line = f'{method} "{results_dir}/BN_results/{run_start}/{patient}/{file}" {params}'
+                print(f"CMD LINE: {command_line}\n")
                 process = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 # Get the output and errors if any
                 output, error = process.communicate()

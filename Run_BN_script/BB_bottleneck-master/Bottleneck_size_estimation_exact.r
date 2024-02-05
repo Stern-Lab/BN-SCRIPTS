@@ -146,8 +146,8 @@ if(plot_bool == TRUE){
 LL_tibble <- filter(LL_tibble, Log_Likelihood != -Inf)
 ggplot(data = LL_tibble) + geom_point(aes(x = bottleneck_size, y= Log_Likelihood )) + 
   geom_vline(xintercept= Max_LL_bottleneck )  + 
-  geom_vline(xintercept= lower_CI_bottleneck, color = "green" ) +
-  geom_vline(xintercept= upper_CI_bottleneck, color = "green"  ) + 
+  geom_vline(xintercept= lower_CI_bottleneck, color = "green") +
+  geom_vline(xintercept= upper_CI_bottleneck, color = "green") + 
   labs(x= "Bottleneck Size", y = "Log Likelihood")
 ggsave(filename= paste0(base_name, "_exact.jpg"))
 }

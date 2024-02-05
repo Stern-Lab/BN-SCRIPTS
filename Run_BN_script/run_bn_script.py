@@ -132,7 +132,7 @@ def automatic_exact():
         print(f"\nRESULTS DIR: {results_dir}")
                 
         # Loop through patients
-        for patient in [p for p in os.listdir(results_dir) if os.path.isdir(os.path.join(results_dir, p))]:
+        for patient in [p for p in os.listdir(results_dir) if (os.path.isdir(os.path.join(results_dir, p)) and ("BN_results" not in p))]:
             print(f"-----------PATIENT {patient[-2:]}-----------")
             txt_files = [file for file in os.listdir(f'{results_dir}/{patient}') if file.endswith('.txt')]
             

@@ -18,6 +18,6 @@ def create_protein_dict():
         protein_dict[row['full_mutation']] = (mut_type, row['protein'])
 
 
-    print("Dictionary created")
+    print("Dictionary created...")
     return protein_dict
     

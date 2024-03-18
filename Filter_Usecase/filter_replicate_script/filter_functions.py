@@ -163,9 +163,13 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, pat
     
     # Add protein (mutation type) column
     merged_df["mutation_type"] = ""
+    merged_df["protein"] = ""
+    
     for ind, row in merged_df.iterrows():
-        if row["mutation"] in protein_dict:
-            merged_df.loc[ind, 'mutation_type'] = protein_dict[row['mutation']][0]
+        key = row["mutation"]
+        if key in protein_dict:
+            merged_df.loc[ind, 'mutation_type'] = protein_dict[key][0]
+            merged_df.loc[ind, 'protein'] = protein_dict[key][1]
     
     if "new" in merged_df["final_freq"].unique():
         print("***Error***\nIn decision tree phase 1, there is a case that's not covered!!!")

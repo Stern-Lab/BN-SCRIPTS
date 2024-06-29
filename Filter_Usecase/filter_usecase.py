@@ -33,11 +33,11 @@ def main(ui=False):
             if (user_input == "1"):
                 # REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/V3+V4"
                 # REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
-                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/AccuNGS/1st_timepoint_as_ref_w-o_trimmomatic_trimming"
+                REP_PATH = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/AccuNGS/1st_timepoint_as_ref_w-manual_trim_of_trimmomatic_samples"
                 PATIENTS = r"/sternadi/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             elif (user_input == "2"):
-                REP_PATH = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/first_timepoint_as_reference"
+                REP_PATH = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_after_pipeline/replicates_2023/AccuNGS/1st_timepoint_as_ref_w-manual_trim_of_trimmomatic_samples"
                 PATIENTS = r"Z:/nobackup/volume1/natalie/ichilov_chronic_omicron/libraries_analysis/replicates_2023/all_patients_global_content_initials_V4.csv"
                 break
             else:
@@ -126,6 +126,7 @@ def main(ui=False):
             print(f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.")
             
             log_txt += f"Filtering patient {curr_patient_id} timepoint {curr_timepoint}.\n"
+            
             # Find replicate1 file
             s1_rep1, found = get_freq_file(curr_sample_id, replicate_dirs, REP_PATH)
             if not (found):
@@ -154,7 +155,7 @@ def main(ui=False):
             specific_res_dir = f"{res_dir}/{curr_patient_id}/{curr_timepoint}"
             os.makedirs(specific_res_dir)
             
-            # filter timepoint and update data to results
+            # Filter timepoint and update data to results
             total_merged_mutations, merged_mutations_NA, merged_mutations_0, merged_mutations_with_f = ff.filter(s1_rep1, s1_rep2, FREQ, COVERAGE, BASECOUNT, protein_dict, specific_res_dir, curr_patient_id, curr_timepoint, filter_indels)
             results_df.loc[ind, "total_merged_mutations"] = total_merged_mutations
             results_df.loc[ind, "merged_mutations_with_f"] = merged_mutations_with_f

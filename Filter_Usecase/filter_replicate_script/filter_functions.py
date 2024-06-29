@@ -58,8 +58,7 @@ def filter_deletion_insertion(df):
     return ret_df
 
 def filter_non_mutations(df):
-    ret_df = df.loc[(df['ref_base'] != df['read_base'])]
-    ret_df = df
+    ret_df = df.loc[(df['ref_base'] != df['read_base']) & (df['ref_base'] != "N")]
     return ret_df[~ret_df['ref_pos'].astype(int).isin(PROBLEMATIC)]
 
 def calc_weighted_avg(bs1, bs2, cvg1, cvg2):
@@ -171,7 +170,7 @@ def filter(tsv1, tsv2, freq, coverage, base_count, protein_dict, result_dir, pat
             merged_df.loc[ind, 'mutation_type'] = protein_dict[key][0]
             merged_df.loc[ind, 'protein'] = protein_dict[key][1]
     
-    if "new" in merged_df["final_freq"].unique():
+    if np.any(merged_df["final_freq"].unique() == "new"):
         print("***Error***\nIn decision tree phase 1, there is a case that's not covered!!!")
     merged_df.to_csv(f"{result_dir}/{patient_name}_T{timepoint}_merged.csv", index=False)
 

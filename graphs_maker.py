@@ -52,7 +52,7 @@ def create_plot(EF_df, filterd):
     for p in PAT_DIRS:
         if p == "N9" and filterd:
             continue
-        print(f"\n***Patients {p}***")
+        print(f"\n***Patients {p} ***")
         full_p_dir = res_dir + f"/{p}"
         time_points = [d for d in os.listdir(full_p_dir) if (os.path.isdir(os.path.join(full_p_dir, d)))]
         for tp in time_points:
